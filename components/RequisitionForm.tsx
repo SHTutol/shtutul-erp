@@ -193,7 +193,7 @@ export const RequisitionForm: React.FC<RequisitionFormProps> = ({
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2" ref={payeeRef}>
                 <label className="text-[11px] font-black text-slate-500 uppercase tracking-widest flex items-center gap-2">
                   <User size={14} className="text-purple-600" /> Name of Payee
@@ -214,7 +214,7 @@ export const RequisitionForm: React.FC<RequisitionFormProps> = ({
                           key={idx}
                           type="button"
                           onClick={() => handlePayeeSelect(payee.name)}
-                          className="w-full text-left px-6 py-4 hover:bg-purple-50 transition-colors border-b border-slate-50 font-black text-slate-700 uppercase text-sm"
+                          className="w-full text-left px-6 py-4 hover:bg-purple-50 transition-colors border-b border-slate-50 font-regular text-slate-700 uppercase text-sm"
                         >
                           {payee.name}
                         </button>
@@ -230,19 +230,19 @@ export const RequisitionForm: React.FC<RequisitionFormProps> = ({
                   name="through"
                   value={data.through}
                   onChange={handleChange}
-                  className="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl px-6 py-5 font-black text-slate-800 outline-none focus:border-purple-600 transition-all text-lg uppercase" 
+                  className="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl px-6 py-5 font-regular text-slate-800 outline-none focus:border-purple-600 transition-all text-lg uppercase" 
                 />
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-2">
               <div className="md:col-span-2 space-y-2">
                 <label className="text-[11px] font-black text-slate-500 uppercase tracking-widest">Purpose</label>
                 <textarea 
                   name="purpose"
                   value={data.purpose}
                   onChange={handleChange}
-                  className="w-full h-24 bg-slate-50 border-2 border-slate-100 rounded-2xl px-6 py-4 font-black text-slate-800 outline-none focus:border-purple-600 transition-all resize-none text-base uppercase" 
+                  className="w-full h-24 bg-slate-50 border-2 border-slate-100 rounded-2xl px-6 py-4 font-regular text-slate-800 outline-none focus:border-purple-600 transition-all resize-none text-base uppercase" 
                 />
               </div>
               <div className="space-y-2">
@@ -252,7 +252,7 @@ export const RequisitionForm: React.FC<RequisitionFormProps> = ({
                   name="typeOfRequisition"
                   value={data.typeOfRequisition}
                   onChange={handleChange}
-                  className="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl px-6 py-5 font-black text-slate-800 outline-none focus:border-purple-600 h-[96px] text-lg uppercase" 
+                  className="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl px-6 py-5 font-regular text-slate-800 outline-none focus:border-purple-600 h-[96px] text-lg uppercase" 
                 />
               </div>
               <div className="space-y-2">
@@ -270,7 +270,7 @@ export const RequisitionForm: React.FC<RequisitionFormProps> = ({
               </div>
             </div>
 
-            <div className="pt-10 flex gap-4 border-t border-slate-100">
+            <div className="pt-10 flex gap-2 border-t border-slate-100">
               <button 
                 type="submit"
                 className="flex-grow px-10 py-5 rounded-2xl bg-purple-600 font-black text-white hover:bg-purple-700 transition-all shadow-2xl flex items-center justify-center gap-3 uppercase text-xl tracking-wider active:scale-[0.98]"
