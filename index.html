@@ -5,24 +5,30 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>SHTUTUL ERP System</title>
     
+    <script src="https://cdn.tailwindcss.com"></script>
+    
     <link rel="manifest" href="/manifest.json">
     <link rel="icon" href="/favicon.ico">
     <meta name="theme-color" content="#0f172a">
 
     <style>
       @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+      
+      /* ব্রাউজার স্ক্রলবার হাইড করার জন্য কিছু কাস্টম স্টাইল */
+      .scrollbar-hide::-webkit-scrollbar { display: none; }
+      .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
 
     <script type="importmap">
     {
       "imports": {
-        "react": "https://esm.sh/react@^19.2.4",
-        "react-dom": "https://esm.sh/react-dom@^19.2.4",
-        "react-dom/client": "https://esm.sh/react-dom@^19.2.4/client",
-        "lucide-react": "https://esm.sh/lucide-react@^0.564.0",
-        "firebase/app": "https://esm.sh/firebase@^11.0.1/app",
-        "firebase/firestore": "https://esm.sh/firebase@^11.0.1/firestore",
-        "firebase/auth": "https://esm.sh/firebase@^11.0.1/auth"
+        "react": "https://esm.sh/react@19.0.0",
+        "react-dom": "https://esm.sh/react-dom@19.0.0",
+        "react-dom/client": "https://esm.sh/react-dom@19.0.0/client",
+        "lucide-react": "https://esm.sh/lucide-react@0.460.0",
+        "firebase/app": "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js",
+        "firebase/firestore": "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js",
+        "firebase/auth": "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js"
       }
     }
     </script>
@@ -31,6 +37,17 @@
   </head>
   <body>
     <div id="root"></div>
+    
     <script type="module" src="/index.tsx"></script>
+
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js').catch(err => {
+            console.log('SW registration skipped (File may be missing)');
+          });
+        });
+      }
+    </script>
   </body>
 </html>
