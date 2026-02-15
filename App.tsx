@@ -104,7 +104,7 @@ service cloud.firestore {
       const q = sortQuery || collection(db, coll);
       return onSnapshot(q, 
         (snapshot: QuerySnapshot<DocumentData>) => {
-          const data = snapshot.docs.map((d: QueryDocumentSnapshot<DocumentData>) => d.data() as any);
+          const data = snapshot.docs.map((d: any) => d.data());
           setter(data);
           setPermissionError(false);
           setIsOnline(true);
