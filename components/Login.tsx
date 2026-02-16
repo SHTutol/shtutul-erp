@@ -74,8 +74,8 @@ export const Login: React.FC<LoginProps> = ({ onLogin, users }) => {
           <div className="inline-flex p-5 bg-gradient-to-br from-indigo-600 to-purple-700 rounded-[2.5rem] shadow-2xl mb-8 border border-white/10 ring-8 ring-indigo-500/5">
             <ShieldCheck size={58} className="text-white" />
           </div>
-          <h1 className="text-white text-5xl font-black tracking-tighter uppercase italic leading-none">
-            SIM <span className="text-indigo-400">ERP</span>
+          <h1 className="text-white text-4xl font-black tracking-tighter uppercase italic leading-none">
+            SHTutol <span className="text-indigo-400">ERP</span>
           </h1>
           <p className="text-slate-500 font-black uppercase tracking-[0.4em] text-[9px] mt-4 opacity-70">Enterprise Cloud Resource Manager</p>
         </div>

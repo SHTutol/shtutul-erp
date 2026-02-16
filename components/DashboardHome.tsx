@@ -58,8 +58,8 @@ export const DashboardHome: React.FC<DashboardHomeProps> = ({ onViewChange }) =>
         <div className="absolute top-0 right-0 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl -mr-20 -mt-20"></div>
         <div className="z-10 flex justify-between items-end">
           <div>
-            <h1 className="text-white text-5xl font-black tracking-tight mb-2 italic">
-              SIM <span className="text-indigo-400">ERP</span>
+            <h1 className="text-white text-4xl font-black tracking-tight mb-2 italic">
+              SHTutol <span className="text-indigo-400">ERP</span>
             </h1>
             <p className="text-slate-300 text-xl font-medium">
               {getGreeting()}, <span className="text-white font-bold uppercase tracking-widest italic">Manager</span>. Welcome back.
@@ -69,7 +69,7 @@ export const DashboardHome: React.FC<DashboardHomeProps> = ({ onViewChange }) =>
             <div className="text-white text-4xl font-mono font-bold">
               {time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
             </div>
-            <p className="text-slate-400 text-[10px] font-black uppercase tracking-[0.3em] mt-1">SIM Group ERP Systems</p>
+            <p className="text-slate-400 text-[10px] font-black uppercase tracking-[0.3em] mt-1">SHTutol ERP Systems</p>
           </div>
         </div>
       </div>

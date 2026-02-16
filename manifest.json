@@ -1,7 +1,7 @@
 
 {
-  "name": "SHTUTUL ERP System",
-  "short_name": "SHTUTUL ERP",
+  "name": "SHTutol ERP System",
+  "short_name": "SHTutol ERP",
   "description": "Professional ERP for Requisition and Debit Vouchers",
   "start_url": "/",
   "display": "standalone",

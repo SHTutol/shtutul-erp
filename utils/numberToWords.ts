@@ -15,5 +15,5 @@ export const numberToWords = (num: number): string => {
   };
 
   const words = inWords(num).trim();
-  return words ? words + ' Only' : '';
+  return words ? words + ' Taka Only' : '';
 };

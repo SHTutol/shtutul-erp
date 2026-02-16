@@ -50,7 +50,7 @@ body {
     width: 8.2in !important;
     height: 5.8in !important;
     margin: 0 !important; 
-    padding: 0.2in 0.4in !important; 
+    padding: 0.2in 0.2in !important; 
     box-shadow: none !important;
     border: none !important;
     page-break-after: always;
@@ -67,7 +67,7 @@ body {
     width: 7.0in !important;
     height: 8.0in !important;
     margin: 0 auto !important;
-    padding: 0.3in !important;
+    padding: 0.2in !important;
     box-shadow: none !important;
     border: none !important;
     page-break-after: always;

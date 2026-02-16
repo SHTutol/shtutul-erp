@@ -104,7 +104,7 @@ service cloud.firestore {
       const q = sortQuery || collection(db, coll);
       return onSnapshot(q, 
         (snapshot: QuerySnapshot<DocumentData>) => {
-          const data = snapshot.docs.map((d: any) => d.data());
+          const data = snapshot.docs.map((d: QueryDocumentSnapshot<DocumentData>) => d.data() as any);
           setter(data);
           setPermissionError(false);
           setIsOnline(true);
@@ -208,7 +208,7 @@ service cloud.firestore {
       <aside className={`no-print bg-slate-900 text-white flex flex-col transition-all duration-500 ease-in-out shadow-2xl z-50 ${isSidebarOpen ? 'w-72' : 'w-24'}`}>
         <div className="h-24 flex items-center justify-between px-6 border-b border-white/5 bg-slate-950">
           <div className={`overflow-hidden transition-all duration-300 ${isSidebarOpen ? 'w-auto' : 'w-0'}`}>
-            <span className="text-2xl font-black tracking-tighter whitespace-nowrap bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent italic">SIM ERP</span>
+            <span className="text-xl font-black tracking-tighter whitespace-nowrap bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent italic">SHTutol ERP</span>
           </div>
           <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className="p-2.5 rounded-xl hover:bg-slate-800 text-slate-400 hover:text-white transition-all shadow-lg">{isSidebarOpen ? <X size={20} /> : <Menu size={24} />}</button>
         </div>
@@ -257,7 +257,7 @@ service cloud.firestore {
             <div className="p-3 bg-slate-100 rounded-2xl text-indigo-600">{menuItems.find(m => m.id === currentView)?.icon || <Layers size={22} />}</div>
             <div>
               <h2 className="text-2xl font-black text-slate-900 uppercase tracking-tighter italic">{menuItems.find(m => m.id === currentView)?.label || 'Document'}</h2>
-              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] -mt-1">SIM Group ERP Systems</p>
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] -mt-1">SHTutol ERP Systems</p>
             </div>
           </div>
           <div className="flex items-center gap-6">
@@ -287,7 +287,7 @@ service cloud.firestore {
              <RefreshCw size={12} className={isOnline ? "animate-spin text-indigo-500" : "text-red-500"} /> 
              System Status: <span className={isOnline ? "text-green-500" : "text-red-500"}>{isOnline ? "Cloud Synchronized" : "Sync Error (Check Permissions)"}</span>
            </div>
-           <div>© 2025 SIM Group - All Rights Reserved</div>
+           <div>© 2025 SHTutol ERP - All Rights Reserved</div>
         </footer>
       </main>
 
