@@ -188,7 +188,7 @@ export const DebitVoucher: React.FC<DebitVoucherProps> = ({
 
               <div className="flex items-start gap-2">
                 <span className="text-[11px] font-bold mt-1 whitespace-nowrap">For</span>
-                <div className="flex-grow font-bold italic text-[11px] px-2 uppercase leading-6 break-words min-h-[48px]"
+                <div className="flex-grow border-b border-black font-bold italic text-[11px] px-2 uppercase leading-6 break-words min-h-[48px]"
                      style={{ 
                        backgroundImage: 'linear-gradient(transparent 23px, black 23.5px)', 
                        backgroundSize: '100% 24px' 
@@ -202,8 +202,8 @@ export const DebitVoucher: React.FC<DebitVoucherProps> = ({
                   <thead>
                     <tr className="font-bold">
                       <th className="border border-black p-2 w-[40%]">Account Head & Particulars</th>
-                      <th className="border border-black p-2 w-14">Control</th>
-                      <th className="border border-black p-2 w-14">Subsidiary</th>
+                      <th className="border border-black p-2 w-12">Control</th>
+                      <th className="border border-black p-2 w-12">Subsidiary</th>
                       <th className="border border-black p-0" colSpan={2}>
                         <div className="border-b border-black p-2">Amount</div>
                         <div className="flex">
@@ -211,7 +211,7 @@ export const DebitVoucher: React.FC<DebitVoucherProps> = ({
                            <div className="w-6 p-2 text-[9px]">Ps.</div>
                         </div>
                       </th>
-                      <th className="border border-black p-2 w-24">Signature of Recipient</th>
+                      <th className="border border-black p-2 w-26">Signature of Recipient</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -235,7 +235,7 @@ export const DebitVoucher: React.FC<DebitVoucherProps> = ({
                 </table>
               </div>
 
-              <div className="mt-2 text-[11px]">
+              <div className="mt-1 text-[11px]">
                 <span className="font-bold mr-2">Enclosed No. Papers :</span>
               </div>
             </div>
