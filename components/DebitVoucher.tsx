@@ -132,7 +132,7 @@ export const DebitVoucher: React.FC<DebitVoucherProps> = ({
             <div className="text-center mb-4">
               <h1 className="text-[20px] font-black leading-tight uppercase mb-0">{data.sisterConcern || 'AZLAN KNIT DYEING LTD.'}</h1>
               <h2 className="text-[14px] font-bold uppercase mt-0 mb-0">{data.unit || 'KNIT DYEING UNIT'}</h2>
-              <p className="text-[10px] font-medium italic">House no. 315, Road No. 4, Baridhara DOHS, Dhaka-1206</p>
+              <p className="text-[10px] font-medium ragular">House no. 315, Road No. 4, Baridhara DOHS, Dhaka-1206</p>
             </div>
 
             <div className="flex justify-between items-start px-1 mt-2 mb-1">
@@ -150,7 +150,7 @@ export const DebitVoucher: React.FC<DebitVoucherProps> = ({
                 </div>
                 <div className="flex">
                   <div className="w-14 px-2 py-1.5 border-r border-black font-bold bg-gray-50/50 uppercase text-[9px]">Tk.</div>
-                  <div className="flex-grow px-2 py-1.5 text-right font-black italic">{data.amountTk > 0 ? data.amountTk.toLocaleString() : '-'} /-</div>
+                  <div className="flex-grow px-2 py-1.5 text-right font-black ragular">{data.amountTk > 0 ? data.amountTk.toLocaleString() : '-'} /-</div>
                 </div>
               </div>
             </div>
@@ -188,7 +188,7 @@ export const DebitVoucher: React.FC<DebitVoucherProps> = ({
 
               <div className="flex items-start gap-2">
                 <span className="text-[11px] font-bold mt-1 whitespace-nowrap">For</span>
-                <div className="flex-grow border-b border-black font-bold italic text-[11px] px-2 uppercase leading-6 break-words min-h-[48px]"
+                <div className="flex-grow border-b border-black font-bold ragular text-[11px] px-2 uppercase leading-6 break-words min-h-[48px]"
                      style={{ 
                        backgroundImage: 'linear-gradient(transparent 23px, black 23.5px)', 
                        backgroundSize: '100% 24px' 
@@ -208,7 +208,7 @@ export const DebitVoucher: React.FC<DebitVoucherProps> = ({
                         <div className="border-b border-black p-2">Amount</div>
                         <div className="flex">
                            <div className="flex-grow border-r border-black p-2">Tk.</div>
-                           <div className="w-6 p-2 text-[9px]">Ps.</div>
+                           <div className="w-6 p-2 text-[10px]">Ps.</div>
                         </div>
                       </th>
                       <th className="border border-black p-2 w-26">Signature of Recipient</th>
@@ -216,12 +216,12 @@ export const DebitVoucher: React.FC<DebitVoucherProps> = ({
                   </thead>
                   <tbody>
                     {[...Array(6)].map((_, i) => (
-                      <tr key={i} className="h-7">
+                      <tr key={i} className="h-5">
                         <td className="border border-black text-left px-2 font-bold italic uppercase">{i === 0 ? data.accountHead : ''}</td>
                         <td className="border border-black"></td>
                         <td className="border border-black"></td>
-                        <td className="border border-black text-right px-2 font-bold italic">{i === 0 && data.amountTk > 0 ? data.amountTk.toLocaleString() : ''}</td>
-                        <td className="border border-black text-center text-[10px] w-10">{i === 0 && data.amountTk > 0 ? '00' : ''}</td>
+                        <td className="border border-black text-right px-2 font-bold ragular">{i === 0 && data.amountTk > 0 ? data.amountTk.toLocaleString() : ''}</td>
+                        <td className="border border-black text-left text-[10px] w-6">{i === 0 && data.amountTk > 0 ? '00' : ''}</td>
                         <td className="border border-black"></td>
                       </tr>
                     ))}
