@@ -205,10 +205,10 @@ export const DebitVoucher: React.FC<DebitVoucherProps> = ({
                       <th className="border border-black p-2 w-16">Control</th>
                       <th className="border border-black p-2 w-16">Subsidiary</th>
                       <th className="border border-black p-0" colSpan={2}>
-                        <div className="border-b border-black p-1">Amount</div>
+                        <div className="border-b border-black p-2">Amount</div>
                         <div className="flex">
-                           <div className="flex-grow border-r border-black p-1">Tk.</div>
-                           <div className="w-10 p-1 text-[9px]">Ps.</div>
+                           <div className="flex-grow border-r border-black p-2">Tk.</div>
+                           <div className="w-10 p-2 text-[9px]">Ps.</div>
                         </div>
                       </th>
                       <th className="border border-black p-2 w-24">Signature of Recipient</th>
