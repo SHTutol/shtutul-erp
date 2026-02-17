@@ -20,7 +20,8 @@ import {
 
 interface RequisitionListProps {
   requisitions: RequisitionData[];
-  setRequisitions: React.Dispatch<React.SetStateAction<RequisitionData[]>>;
+  onDelete: (id: string) => void;
+  onUpdateStatus: (id: string, status: 'Pending' | 'Approved') => void;
   onAdd: () => void;
   onEdit: (req: RequisitionData) => void;
   onView: (req: RequisitionData) => void;
@@ -30,7 +31,8 @@ interface RequisitionListProps {
 
 export const RequisitionList: React.FC<RequisitionListProps> = ({ 
   requisitions, 
-  setRequisitions, 
+  onDelete,
+  onUpdateStatus,
   onAdd, 
   onEdit,
   onView,
@@ -46,7 +48,7 @@ export const RequisitionList: React.FC<RequisitionListProps> = ({
   const handleDelete = (id?: string) => {
     const targetId = id || selectedId;
     if (targetId && confirm('Are you sure you want to delete this requisition?')) {
-      setRequisitions(prev => prev.filter(r => r.id !== targetId));
+      onDelete(targetId);
       if (targetId === selectedId) setSelectedId(null);
     } else if (!targetId) {
       alert("Please select a record first.");
@@ -57,14 +59,10 @@ export const RequisitionList: React.FC<RequisitionListProps> = ({
     const targetId = id || selectedId;
     if (targetId) {
       setIsSaving(true);
-      await new Promise(resolve => setTimeout(resolve, 800));
-      
-      setRequisitions(prev => prev.map(r => r.id === targetId ? { ...r, status: 'Approved' } : r));
-      
+      onUpdateStatus(targetId, 'Approved');
       if (searchTerm.trim() === '' && targetId === selectedId) {
         setSelectedId(null);
       }
-      
       setIsSaving(false);
     } else {
       alert("Please select a record first.");
@@ -73,7 +71,7 @@ export const RequisitionList: React.FC<RequisitionListProps> = ({
 
   const handleUndoApprove = () => {
     if (selectedId) {
-      setRequisitions(prev => prev.map(r => r.id === selectedId ? { ...r, status: 'Pending' } : r));
+      onUpdateStatus(selectedId, 'Pending');
     } else {
       alert("Please select a record first.");
     }
@@ -98,10 +96,13 @@ export const RequisitionList: React.FC<RequisitionListProps> = ({
 
   const totalAmount = filtered.reduce((sum, req) => sum + (req.amountTk || 0), 0);
 
+  // Check if preview is allowed
+  const isPreviewDisabled = !selectedReq || selectedReq.status !== 'Approved';
+
   return (
     <div className="w-full flex flex-col bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden animate-in fade-in duration-500">
       
-      {/* ERP Style Toolbar - Based on User Screenshot + Undo Approve */}
+      {/* ERP Style Toolbar */}
       <div className="no-print bg-[#F3F3F3] border-b border-gray-300 p-1 flex items-center flex-wrap gap-x-1">
         
         {/* Search Field */}
@@ -116,7 +117,6 @@ export const RequisitionList: React.FC<RequisitionListProps> = ({
           />
         </div>
 
-        {/* Toolbar Buttons matching user screenshot */}
         <button 
           onClick={onAdd}
           className="flex items-center gap-1.5 px-2 py-1.5 hover:bg-gray-200 text-[#003366] font-medium text-[13px] border-r border-gray-300 transition-colors"
@@ -157,7 +157,6 @@ export const RequisitionList: React.FC<RequisitionListProps> = ({
           <span>Approve</span>
         </button>
 
-        {/* Undo Approve Button */}
         <button 
           onClick={handleUndoApprove}
           disabled={!selectedReq || selectedReq.status !== 'Approved' || isSaving}
@@ -169,10 +168,11 @@ export const RequisitionList: React.FC<RequisitionListProps> = ({
 
         <button 
           onClick={() => selectedReq && onPreview(selectedReq)}
-          disabled={!selectedReq}
-          className={`flex items-center gap-1.5 px-2 py-1.5 font-medium text-[13px] border-r border-gray-300 transition-colors ${selectedReq ? 'hover:bg-gray-200 text-[#003366]' : 'text-gray-400 opacity-50 cursor-not-allowed'}`}
+          disabled={isPreviewDisabled}
+          className={`flex items-center gap-1.5 px-2 py-1.5 font-medium text-[13px] border-r border-gray-300 transition-colors ${!isPreviewDisabled ? 'hover:bg-gray-200 text-[#003366]' : 'text-gray-400 opacity-50 cursor-not-allowed'}`}
+          title={isPreviewDisabled ? "Only approved requisitions can be previewed" : "Preview and Print"}
         >
-          <Printer size={20} className={selectedReq ? "text-[#2196F3]" : "text-gray-300"} /> <span>Preview</span>
+          <Printer size={20} className={!isPreviewDisabled ? "text-[#2196F3]" : "text-gray-300"} /> <span>Preview</span>
         </button>
 
         <button 

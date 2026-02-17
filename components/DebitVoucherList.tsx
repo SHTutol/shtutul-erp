@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { DebitVoucherData } from '../types';
 import { ViewType } from '../App';
@@ -22,7 +23,8 @@ import {
 
 interface DebitVoucherListProps {
   vouchers: DebitVoucherData[];
-  setVouchers: React.Dispatch<React.SetStateAction<DebitVoucherData[]>>;
+  onDelete: (id: string) => void;
+  onUpdateStatus: (id: string, status: 'Pending' | 'Approved') => void;
   onAdd: () => void;
   onEdit: (dv: DebitVoucherData) => void;
   onView: (dv: DebitVoucherData) => void;
@@ -32,7 +34,8 @@ interface DebitVoucherListProps {
 
 export const DebitVoucherList: React.FC<DebitVoucherListProps> = ({ 
   vouchers, 
-  setVouchers, 
+  onDelete,
+  onUpdateStatus,
   onAdd, 
   onEdit,
   onView,
@@ -48,7 +51,7 @@ export const DebitVoucherList: React.FC<DebitVoucherListProps> = ({
   const handleDelete = (id?: string) => {
     const targetId = id || selectedId;
     if (targetId && confirm('Are you sure you want to delete this debit voucher?')) {
-      setVouchers(prev => prev.filter(v => v.id !== targetId));
+      onDelete(targetId);
       if (targetId === selectedId) setSelectedId(null);
     } else if (!targetId) {
       alert("Please select a record first.");
@@ -59,14 +62,10 @@ export const DebitVoucherList: React.FC<DebitVoucherListProps> = ({
     const targetId = id || selectedId;
     if (targetId) {
       setIsSaving(true);
-      await new Promise(resolve => setTimeout(resolve, 600));
-      setVouchers(prev => prev.map(v => v.id === targetId ? { ...v, status: 'Approved' } : v));
-      
-      // Clear selection if the approved item disappears from the default view
+      onUpdateStatus(targetId, 'Approved');
       if (searchTerm.trim() === '' && targetId === selectedId) {
         setSelectedId(null);
       }
-      
       setIsSaving(false);
     } else {
       alert("Please select a record first.");
@@ -75,7 +74,7 @@ export const DebitVoucherList: React.FC<DebitVoucherListProps> = ({
 
   const handleUndoApprove = () => {
     if (selectedId) {
-      setVouchers(prev => prev.map(v => v.id === selectedId ? { ...v, status: 'Pending' } : v));
+      onUpdateStatus(selectedId, 'Pending');
     } else {
       alert("Please select a record first.");
     }
@@ -96,6 +95,9 @@ export const DebitVoucherList: React.FC<DebitVoucherListProps> = ({
   });
 
   const totalAmount = filtered.reduce((sum, v) => sum + (v.amountTk || 0), 0);
+
+  // Check if preview is allowed
+  const isPreviewDisabled = !selectedDV || selectedDV.status !== 'Approved';
 
   return (
     <div className="w-full flex-grow flex flex-col bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden animate-in fade-in duration-500">
@@ -166,10 +168,11 @@ export const DebitVoucherList: React.FC<DebitVoucherListProps> = ({
 
         <button 
           onClick={() => selectedDV && onPreview(selectedDV)}
-          disabled={!selectedDV}
-          className={`flex items-center gap-1.5 px-3 py-1.5 font-semibold text-[13px] border-r border-gray-300 transition-colors ${selectedDV ? 'hover:bg-gray-200 text-[#003366]' : 'text-gray-400 opacity-50 cursor-not-allowed'}`}
+          disabled={isPreviewDisabled}
+          className={`flex items-center gap-1.5 px-3 py-1.5 font-semibold text-[13px] border-r border-gray-300 transition-colors ${!isPreviewDisabled ? 'hover:bg-gray-200 text-[#003366]' : 'text-gray-400 opacity-50 cursor-not-allowed'}`}
+          title={isPreviewDisabled ? "Only approved vouchers can be previewed" : "Preview and Print"}
         >
-          <Printer size={20} className={selectedDV ? "text-[#2196F3]" : "text-gray-300"} /> <span>Preview</span>
+          <Printer size={20} className={!isPreviewDisabled ? "text-[#2196F3]" : "text-gray-300"} /> <span>Preview</span>
         </button>
 
         <button onClick={() => window.print()} className="flex items-center gap-1.5 px-3 py-1.5 hover:bg-gray-200 text-[#003366] font-semibold text-[13px] transition-colors">
