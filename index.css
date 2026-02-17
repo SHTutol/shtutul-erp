@@ -67,7 +67,7 @@ body {
     width: 5.85in !important;
     height: 8.27in !important;
     margin: 0 auto !important;
-    padding: 0.2in !important;
+    padding: 0.2in 0.2in 0.2in 0.2in !important;
     box-shadow: none !important;
     border: none !important;
     page-break-after: always;
