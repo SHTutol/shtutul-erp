@@ -221,7 +221,7 @@ export const DebitVoucher: React.FC<DebitVoucherProps> = ({
                         <td className="border border-black"></td>
                         <td className="border border-black"></td>
                         <td className="border border-black text-right px-2 font-bold ragular">{i === 0 && data.amountTk > 0 ? data.amountTk.toLocaleString() : ''}</td>
-                        <td className="border border-black text-left text-[10px] w-6">{i === 0 && data.amountTk > 0 ? '00' : ''}</td>
+                        <td className="border border-black text-right text-[10px] w-6">{i === 0 && data.amountTk > 0 ? '00' : ''}</td>
                         <td className="border border-black"></td>
                       </tr>
                     ))}
