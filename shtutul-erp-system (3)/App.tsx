@@ -25,7 +25,8 @@ import {
   QuerySnapshot,
   DocumentData,
   Query,
-  QueryDocumentSnapshot
+  QueryDocumentSnapshot,
+  serverTimestamp
 } from 'firebase/firestore';
 import { 
   LayoutDashboard, 
@@ -51,7 +52,8 @@ import {
   ShieldAlert,
   Terminal,
   CircleCheck,
-  Loader2
+  Loader2,
+  Wifi
 } from 'lucide-react';
 
 export type ViewType = 'DASHBOARD' | 'REQ_LIST' | 'REQUISITION' | 'VIEW_REQUISITION' | 'DV_LIST' | 'DEBIT_VOUCHER' | 'VIEW_DV' | 'REQ_REPORT' | 'DV_REPORT' | 'NEW_NAME' | 'NEW_SISTER' | 'UNIT_ENTRY' | 'USER_MANAGEMENT';
@@ -92,6 +94,27 @@ service cloud.firestore {
   }
 }`;
 
+  // Heartbeat Effect: Update lastSeen every 30 seconds
+  useEffect(() => {
+    if (!user) return;
+
+    const updatePresence = async () => {
+      try {
+        const userDocRef = doc(db, 'users', user.id);
+        await setDoc(userDocRef, {
+          lastSeen: Date.now()
+        }, { merge: true });
+      } catch (err) {
+        console.error("Presence update failed:", err);
+      }
+    };
+
+    updatePresence();
+    const interval = setInterval(updatePresence, 30000);
+    return () => clearInterval(interval);
+  }, [user]);
+
+  // Firestore Real-time Listeners
   useEffect(() => {
     const handleError = (error: any) => {
       console.error("Firestore Error:", error);
@@ -125,6 +148,8 @@ service cloud.firestore {
       unsubUsers(); unsubReqs(); unsubDVs(); unsubUnits(); unsubPayees(); unsubSisters();
     };
   }, []);
+
+  const activeUsers = users.filter(u => u.lastSeen && (Date.now() - u.lastSeen < 60000)); // Online if seen in last 60s
 
   const copyRules = () => {
     navigator.clipboard.writeText(ruleCode);
@@ -197,7 +222,7 @@ service cloud.firestore {
 
   const renderContent = () => {
     switch (currentView) {
-      case 'DASHBOARD': return <DashboardHome onViewChange={setCurrentView} />;
+      case 'DASHBOARD': return <DashboardHome onViewChange={setCurrentView} activeUserCount={activeUsers.length} />;
       case 'REQ_LIST': return <RequisitionList requisitions={requisitions} onDelete={(id) => deleteFromCloud('requisitions', id)} onAdd={() => { setEditingRequisition(null); setCurrentView('REQUISITION'); }} onEdit={(req) => { setEditingRequisition(req); setCurrentView('REQUISITION'); }} onView={(req) => { setViewingRequisition(req); setCurrentView('VIEW_REQUISITION'); }} onPreview={(req) => { setViewingRequisition(req); setCurrentView('VIEW_REQUISITION'); setTimeout(() => window.print(), 800); }} onViewChange={setCurrentView} onUpdateStatus={(id, status) => { const req = requisitions.find(r => r.id === id); if (req) saveToCloud('requisitions', {...req, status}); }} />;
       case 'REQUISITION': return <RequisitionForm onViewChange={setCurrentView} onSave={(data) => { saveToCloud('requisitions', data); setCurrentView('REQ_LIST'); }} editingData={editingRequisition} nextReqNo={`REQ-00${requisitions.length + 1}`} availableUnits={units} availablePayees={payees} availableSisters={sisters} />;
       case 'VIEW_REQUISITION': return <RequisitionForm onViewChange={setCurrentView} editingData={viewingRequisition} readOnly={true} availableUnits={units} availablePayees={payees} availableSisters={sisters} />;
@@ -226,7 +251,7 @@ service cloud.firestore {
         users.forEach(u => { if (!existingIds.includes(u.id)) deleteFromCloud('users', u.id); });
         list.forEach(u => saveToCloud('users', u));
       }} onViewChange={setCurrentView} />;
-      default: return <DashboardHome onViewChange={setCurrentView} />;
+      default: return <DashboardHome onViewChange={setCurrentView} activeUserCount={activeUsers.length} />;
     }
   };
 
@@ -251,6 +276,35 @@ service cloud.firestore {
             </button>
           ))}
         </nav>
+
+        {/* Online Users Section */}
+        {isSidebarOpen && (
+          <div className="p-6 bg-slate-950/50 border-t border-white/5">
+            <div className="flex items-center justify-between mb-4">
+               <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest flex items-center gap-2">
+                 <Wifi size={12} className="text-green-500 animate-pulse" /> Active Now
+               </span>
+               <span className="bg-green-500 text-white text-[9px] font-black px-2 py-0.5 rounded-full">{activeUsers.length}</span>
+            </div>
+            <div className="space-y-3">
+              {activeUsers.slice(0, 5).map(u => (
+                <div key={u.id} className="flex items-center gap-3">
+                  <div className="relative">
+                    <img src={u.avatar} className="w-8 h-8 rounded-xl border border-white/10" alt="" />
+                    <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-green-500 border-2 border-slate-900 rounded-full"></div>
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-[10px] font-black text-slate-300 uppercase truncate max-w-[120px]">{u.name}</span>
+                    <span className="text-[8px] font-bold text-slate-600 uppercase">{u.role}</span>
+                  </div>
+                </div>
+              ))}
+              {activeUsers.length > 5 && (
+                <p className="text-[9px] font-bold text-slate-500 italic ml-1">+{activeUsers.length - 5} more users online</p>
+              )}
+            </div>
+          </div>
+        )}
       </aside>
       <main className="flex-grow overflow-auto relative flex flex-col bg-[#F8FAFC]">
         
