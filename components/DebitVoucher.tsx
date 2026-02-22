@@ -87,9 +87,14 @@ export const DebitVoucher: React.FC<DebitVoucherProps> = ({
     setData(prev => ({ ...prev, [name]: name === 'amountTk' ? parseFloat(value) || 0 : value }));
   };
 
-  const handlePayeeSelect = (payee: string) => {
-    setData(prev => ({ ...prev, paidTo: payee }));
-    setPayeeSearch(payee);
+  const handlePayeeSelect = (payeeName: string) => {
+    const payeeRecord = availablePayees.find(p => p.name === payeeName);
+    setData(prev => ({ 
+      ...prev, 
+      paidTo: payeeName,
+      for: payeeRecord?.particulars ? `${FOR_PREFIX}${payeeRecord.particulars}` : prev.for
+    }));
+    setPayeeSearch(payeeName);
     setShowPayeeList(false);
   };
 
@@ -129,132 +134,132 @@ export const DebitVoucher: React.FC<DebitVoucherProps> = ({
         
         <div className="bg-white p-0 shadow-2xl overflow-hidden rounded-xl mb-20 print:shadow-none print:m-0">
           <div className="debit-voucher-paper font-serif text-black bg-white flex flex-col h-full relative border border-gray-100 print:border-none">
-            <div className="text-center mb-4">
-              <h1 className="text-[24px] font-black leading-tight uppercase mb-0">{data.sisterConcern || 'AZLAN KNIT DYEING LTD.'}</h1>
-              <h2 className="text-[14px] font-bold uppercase mt-0 mb-0">{data.unit || 'KNIT DYEING UNIT'}</h2>
-              <p className="text-[10px] font-medium ragular">House no. 315, Road No. 4, Baridhara DOHS, Dhaka-1206</p>
+            <div className="text-center mb-2">
+              <h1 className="text-[18px] font-black leading-tight uppercase mb-0">{data.sisterConcern || 'AZLAN KNIT DYEING LTD.'}</h1>
+              <h2 className="text-[13px] font-bold uppercase mt-0 mb-0">{data.unit || 'KNIT DYEING UNIT'}</h2>
+              <p className="text-[9px] font-medium">House no. 315, Road No. 4, Baridhara DOHS, Dhaka-1206</p>
             </div>
 
-            <div className="flex justify-between items-start px-1 mt-2 mb-1">
+            <div className="flex justify-between items-start px-1 mt-1 mb-1">
               <div className="flex items-center gap-2 mt-auto">
-                <span className="text-[11px] font-bold">No.</span>
-                <div className="w-40 border border-black px-2 py-1 text-center font-bold text-[14px] h-[32px] flex items-center justify-center">
+                <span className="text-[10px] font-bold">No.</span>
+                <div className="w-32 border border-black px-2 py-1 text-center font-bold text-[13px] h-[28px] flex items-center justify-center">
                   {data.no.split('-').pop()}
                 </div>
               </div>
 
-              <div className="flex flex-col w-44 border border-black text-[11px]">
+              <div className="flex flex-col w-40 border border-black text-[10px]">
                 <div className="flex border-b border-black">
-                  <div className="w-14 px-2 py-1.5 border-r border-black font-bold bg-gray-50/50 uppercase text-[9px]">Date</div>
-                  <div className="flex-grow px-2 py-1.5 text-center font-bold">{voucherDate}</div>
+                  <div className="w-12 px-2 py-1 border-r border-black font-bold bg-gray-50/50 uppercase text-[8px]">Date</div>
+                  <div className="flex-grow px-2 py-1 text-center font-bold">{voucherDate}</div>
                 </div>
                 <div className="flex">
-                  <div className="w-14 px-2 py-1.5 border-r border-black font-bold bg-gray-50/50 uppercase text-[9px]">Tk.</div>
-                  <div className="flex-grow px-2 py-1.5 text-right font-black ragular">{data.amountTk > 0 ? data.amountTk.toLocaleString() : '-'} /-</div>
+                  <div className="w-12 px-2 py-1 border-r border-black font-bold bg-gray-50/50 uppercase text-[8px]">Tk.</div>
+                  <div className="flex-grow px-2 py-1 text-right font-black">{data.amountTk > 0 ? data.amountTk.toLocaleString() : '-'} /-</div>
                 </div>
               </div>
             </div>
 
             <div className="text-center mt-1 mb-1">
-              <h3 className="text-[16px] font-black italic">Debit Voucher (Cash/Cheque)</h3>
+              <h3 className="text-[14px] font-black italic underline">Debit Voucher (Cash/Cheque)</h3>
             </div>
 
-            <div className="space-y-4 px-1 flex-grow">
+            <div className="space-y-3 px-1 flex-grow">
               <div className="flex border border-black">
-                <div className="px-3 py-2 border-r border-black font-bold whitespace-nowrap bg-gray-50/50 text-[11px]">Paid to Mr/Messrs</div>
-                <div className="flex-grow px-3 py-2 font-bold italic text-[14px] flex items-center uppercase">{data.paidTo}</div>
+                <div className="px-3 py-1.5 border-r border-black font-bold whitespace-nowrap bg-gray-50/50 text-[10px]">Paid to Mr/Messrs</div>
+                <div className="flex-grow px-3 py-1.5 font-bold italic text-[13px] flex items-center uppercase">{data.paidTo}</div>
               </div>
               
               <div className="flex items-end gap-2">
-                <span className="text-[11px] font-bold whitespace-nowrap">Taka (in words)</span>
-                <div className="flex-grow border-b border-black font-bold italic text-[11px] px-2 min-h-[22px] flex items-end uppercase">
+                <span className="text-[10px] font-bold whitespace-nowrap">Taka (in words)</span>
+                <div className="flex-grow border-b border-black font-bold italic text-[10px] px-2 min-h-[20px] flex items-end uppercase">
                   {numberToWords(data.amountTk)}
                 </div>
               </div>
 
               <div className="flex items-end gap-2">
-                <span className="text-[11px] font-medium whitespace-nowrap">Cash/Cheque/P.O/D.D/Advice No.</span>
-                <div className="flex-grow border-b border-black font-bold px-2 italic text-[12px]">{data.paymentNo}</div>
-                <span className="text-[11px] font-medium whitespace-nowrap ml-2">Date</span>
-                <div className="w-32 border-b border-black font-bold px-2 text-center text-[12px]">{instrumentDate}</div>
+                <span className="text-[10px] font-medium whitespace-nowrap">Cash/Cheque/P.O/No.</span>
+                <div className="flex-grow border-b border-black font-bold px-2 italic text-[11px]">{data.paymentNo}</div>
+                <span className="text-[10px] font-medium whitespace-nowrap ml-2">Date</span>
+                <div className="w-28 border-b border-black font-bold px-2 text-center text-[11px]">{instrumentDate}</div>
               </div>
 
               <div className="flex items-end gap-2">
-                <span className="text-[11px] font-medium whitespace-nowrap">On</span>
-                <div className="flex-grow border-b border-black font-bold px-2 italic text-[12px]">{data.bankName}</div>
-                <span className="text-[11px] font-medium whitespace-nowrap ml-2">Bank A/C No</span>
-                <div className="w-48 border-b border-black font-bold px-2 text-[12px]">{data.bankAccountNo}</div>
+                <span className="text-[10px] font-medium whitespace-nowrap">On</span>
+                <div className="flex-grow border-b border-black font-bold px-2 italic text-[11px]">{data.bankName}</div>
+                <span className="text-[10px] font-medium whitespace-nowrap ml-2">A/C No</span>
+                <div className="w-40 border-b border-black font-bold px-2 text-[11px]">{data.bankAccountNo}</div>
               </div>
 
               <div className="flex items-start gap-2">
-                <span className="text-[11px] font-bold mt-1 whitespace-nowrap">For</span>
-                <div className="flex-grow border-b border-black font-bold ragular text-[11px] px-2 uppercase leading-6 break-words min-h-[48px]"
+                <span className="text-[10px] font-bold mt-1 whitespace-nowrap">For</span>
+                <div className="flex-grow border-b border-black font-bold text-[10px] px-2 uppercase leading-5 break-words min-h-[40px]"
                      style={{ 
-                       backgroundImage: 'linear-gradient(transparent 23px, black 23.5px)', 
-                       backgroundSize: '100% 24px' 
+                       backgroundImage: 'linear-gradient(transparent 19px, black 19.5px)', 
+                       backgroundSize: '100% 20px' 
                      }}>
                   {data.for}
                 </div>
               </div>
 
-              <div className="mt-4">
-                <table className="w-full border-collapse border border-black text-center text-[11px]">
+              <div className="mt-2">
+                <table className="w-full border-collapse border border-black text-center text-[10px]">
                   <thead>
-                    <tr className="font-bold">
-                      <th className="border border-black p-2 w-[40%]">Account Head & Particulars</th>
-                      <th className="border border-black p-2 w-12">Control</th>
-                      <th className="border border-black p-2 w-12">Subsidiary</th>
+                    <tr className="font-bold bg-gray-50/50">
+                      <th className="border border-black p-1 w-[40%]">Account Head & Particulars</th>
+                      <th className="border border-black p-1 w-12">Control</th>
+                      <th className="border border-black p-1 w-12">Subsidiary</th>
                       <th className="border border-black p-0" colSpan={2}>
-                        <div className="border-b border-black p-2">Amount</div>
+                        <div className="border-b border-black p-1">Amount</div>
                         <div className="flex">
-                           <div className="flex-grow border-r border-black p-2">Tk.</div>
-                           <div className="w-8 p-2 text-[10px]">Ps.</div>
+                           <div className="flex-grow border-r border-black p-1">Tk.</div>
+                           <div className="w-8 p-1 text-[9px]">Ps.</div>
                         </div>
                       </th>
-                      <th className="border border-black p-2 w-26">Signature of Recipient</th>
+                      <th className="border border-black p-1 w-24">Signature of Recipient</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {[...Array(6)].map((_, i) => (
-                      <tr key={i} className="h-5">
+                    {[...Array(5)].map((_, i) => (
+                      <tr key={i} className="h-[22px]">
                         <td className="border border-black text-left px-2 font-bold italic uppercase">{i === 0 ? data.accountHead : ''}</td>
                         <td className="border border-black"></td>
                         <td className="border border-black"></td>
-                        <td className="border border-black text-right px-2 font-bold ragular">{i === 0 && data.amountTk > 0 ? data.amountTk.toLocaleString() : ''}</td>
-                        <td className="border border-black text-right text-[10px] w-10">{i === 0 && data.amountTk > 0 ? '00' : ''}</td>
+                        <td className="border border-black text-right px-2 font-bold">{i === 0 && data.amountTk > 0 ? data.amountTk.toLocaleString() : ''}</td>
+                        <td className="border border-black text-right text-[9px] w-10">{i === 0 && data.amountTk > 0 ? '00' : ''}</td>
                         <td className="border border-black"></td>
                       </tr>
                     ))}
-                    <tr className="h-7 font-black">
+                    <tr className="h-[28px] font-black bg-gray-50/30">
                       <td className="border border-black" colSpan={3}></td>
-                      <td className="border border-black text-right px-2 font-black ragular">{data.amountTk > 0 ? data.amountTk.toLocaleString() : '-'}</td>
-                      <td className="border border-black text-center text-[10px] w-10">{data.amountTk > 0 ? '00' : ''}</td>
+                      <td className="border border-black text-right px-2 font-black">{data.amountTk > 0 ? data.amountTk.toLocaleString() : '-'}</td>
+                      <td className="border border-black text-center text-[9px] w-10">{data.amountTk > 0 ? '00' : ''}</td>
                       <td className="border border-black"></td>
                     </tr>
                   </tbody>
                 </table>
               </div>
 
-              <div className="mt-1 text-[11px]">
+              <div className="mt-1 text-[10px]">
                 <span className="font-bold mr-2">Enclosed No. Papers :</span>
               </div>
             </div>
 
-            <div className="mt-8 mb-6 px-1 flex justify-between items-end text-[11px] font-bold w-full">
+            <div className="mt-6 mb-4 px-1 flex justify-between items-end text-[10px] font-bold w-full">
               <div className="flex flex-col items-center">
-                <div className="w-28 border-t border-black mb-1"></div>
+                <div className="w-24 border-t border-black mb-1"></div>
                 <span>Prepared by</span>
               </div>
               <div className="flex flex-col items-center">
-                <div className="w-28 border-t border-black mb-1"></div>
+                <div className="w-24 border-t border-black mb-1"></div>
                 <span>Checked by</span>
               </div>
               <div className="flex flex-col items-center">
-                <div className="w-28 border-t border-black mb-1"></div>
+                <div className="w-24 border-t border-black mb-1"></div>
                 <span>Head of Accounts</span>
               </div>
               <div className="flex flex-col items-center">
-                <div className="w-28 border-t border-black mb-1"></div>
+                <div className="w-24 border-t border-black mb-1"></div>
                 <span>Director</span>
               </div>
             </div>
@@ -269,7 +274,6 @@ export const DebitVoucher: React.FC<DebitVoucherProps> = ({
     <div className="no-print w-full flex flex-col items-center bg-slate-100 min-h-screen pb-20">
       <div className="w-full max-w-[1000px] mt-10 bg-white rounded-[2rem] shadow-2xl overflow-hidden border border-slate-200">
         
-        {/* Dark Header */}
         <div className="bg-[#121927] px-8 py-8 flex items-center justify-between border-b border-white/5">
           <div className="flex items-center gap-6">
             <button 
@@ -287,8 +291,6 @@ export const DebitVoucher: React.FC<DebitVoucherProps> = ({
         </div>
 
         <form onSubmit={handleFormSubmit} className="p-10 space-y-12">
-          
-          {/* Top Row: Concern, Unit, No, Date */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div className="space-y-3">
               <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">Sister Concern</label>
@@ -340,7 +342,6 @@ export const DebitVoucher: React.FC<DebitVoucherProps> = ({
             </div>
           </div>
 
-          {/* Second Row: Paid To, Account Head */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div className="space-y-3" ref={payeeRef}>
               <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">Paid To</label>
@@ -379,7 +380,6 @@ export const DebitVoucher: React.FC<DebitVoucherProps> = ({
             </div>
           </div>
 
-          {/* Third Row: Particulars & Amount Block */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="md:col-span-2 space-y-3">
               <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">Particulars (For)</label>
@@ -406,7 +406,6 @@ export const DebitVoucher: React.FC<DebitVoucherProps> = ({
             </div>
           </div>
 
-          {/* Bottom Actions */}
           <div className="pt-8 flex flex-col gap-6">
             <div className="h-px bg-slate-100 w-full"></div>
             <button 

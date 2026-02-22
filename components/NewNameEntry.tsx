@@ -31,6 +31,7 @@ export const NewNameEntry: React.FC<NewNameEntryProps> = ({ onViewChange, payees
   // Modal states
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newPayeeName, setNewPayeeName] = useState('');
+  const [newParticulars, setNewParticulars] = useState('');
   
   const nameInputRefs = useRef<{ [key: string]: HTMLInputElement | null }>({});
   const modalInputRef = useRef<HTMLInputElement>(null);
@@ -46,6 +47,7 @@ export const NewNameEntry: React.FC<NewNameEntryProps> = ({ onViewChange, payees
 
   const handleOpenAddModal = () => {
     setNewPayeeName('');
+    setNewParticulars('');
     setIsModalOpen(true);
   };
 
@@ -62,13 +64,15 @@ export const NewNameEntry: React.FC<NewNameEntryProps> = ({ onViewChange, payees
       id: newId,
       sl: nextSl,
       name: newPayeeName.trim(),
-      phone: '' // Phone can be edited in the table later
+      phone: '', // Phone can be edited in the table later
+      particulars: newParticulars.trim()
     };
     
     onUpdatePayees([...payees, newRecord]);
     setSelectedId(newId);
     setIsModalOpen(false);
     setNewPayeeName('');
+    setNewParticulars('');
   };
 
   const handleNameChange = (id: string, value: string) => {
@@ -77,6 +81,10 @@ export const NewNameEntry: React.FC<NewNameEntryProps> = ({ onViewChange, payees
 
   const handlePhoneChange = (id: string, value: string) => {
     onUpdatePayees(payees.map(n => n.id === id ? { ...n, phone: value } : n));
+  };
+
+  const handleParticularsChange = (id: string, value: string) => {
+    onUpdatePayees(payees.map(n => n.id === id ? { ...n, particulars: value } : n));
   };
 
   const handleDeleteRow = () => {
@@ -171,7 +179,8 @@ export const NewNameEntry: React.FC<NewNameEntryProps> = ({ onViewChange, payees
             <tr className="bg-[#EFEFEF] border-b border-gray-300 text-[#333] font-bold text-[12px] uppercase tracking-wide">
               <th className="px-4 py-2 border-r border-gray-300 text-center w-12">SL</th>
               <th className="px-4 py-2 border-r border-gray-300">Person Name</th>
-              <th className="px-4 py-2 text-left">Phone Number</th>
+              <th className="px-4 py-2 border-r border-gray-300">Phone Number</th>
+              <th className="px-4 py-2 text-left">Default Particulars (For)</th>
             </tr>
           </thead>
           <tbody>
@@ -194,7 +203,7 @@ export const NewNameEntry: React.FC<NewNameEntryProps> = ({ onViewChange, payees
                     placeholder="ENTER NAME..."
                   />
                 </td>
-                <td className="px-4 py-1">
+                <td className="px-4 py-1 border-r border-gray-200">
                   <input 
                     type="text" 
                     value={record.phone}
@@ -203,11 +212,21 @@ export const NewNameEntry: React.FC<NewNameEntryProps> = ({ onViewChange, payees
                     placeholder="ENTER PHONE..."
                   />
                 </td>
+                <td className="px-4 py-1">
+                  <input 
+                    type="text" 
+                    value={record.particulars || ''}
+                    onChange={(e) => handleParticularsChange(record.id, e.target.value)}
+                    className="w-full bg-transparent outline-none font-medium placeholder:text-gray-300 italic"
+                    placeholder="ENTER DEFAULT PARTICULARS..."
+                  />
+                </td>
               </tr>
             ))}
             {/* Filler rows */}
             {Array.from({ length: Math.max(0, 15 - filtered.length) }).map((_, i) => (
               <tr key={`filler-${i}`} className="h-9">
+                <td className="border-r border-gray-200"></td>
                 <td className="border-r border-gray-200"></td>
                 <td className="border-r border-gray-200"></td>
                 <td></td>
@@ -251,6 +270,21 @@ export const NewNameEntry: React.FC<NewNameEntryProps> = ({ onViewChange, payees
                       placeholder="ENTER FULL NAME..."
                       value={newPayeeName}
                       onChange={(e) => setNewPayeeName(e.target.value)}
+                      onKeyDown={(e) => e.key === 'Enter' && handleModalSave()}
+                      className="w-full pl-12 pr-4 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-black text-slate-900 outline-none focus:border-green-600 focus:bg-white transition-all uppercase placeholder:text-slate-300 text-lg shadow-inner"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Default Particulars (For)</label>
+                  <div className="relative">
+                    <FileText className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300" size={18} />
+                    <input 
+                      type="text" 
+                      placeholder="ENTER DEFAULT PARTICULARS..."
+                      value={newParticulars}
+                      onChange={(e) => setNewParticulars(e.target.value)}
                       onKeyDown={(e) => e.key === 'Enter' && handleModalSave()}
                       className="w-full pl-12 pr-4 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-black text-slate-900 outline-none focus:border-green-600 focus:bg-white transition-all uppercase placeholder:text-slate-300 text-lg shadow-inner"
                     />
