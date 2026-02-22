@@ -1,0 +1,37 @@
+# Dependencies
+node_modules/
+/jspm_packages
+
+# Debug logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+.pnpm-debug.log*
+
+# Operating System Files
+.DS_Store
+Thumbs.db
+
+# Environment variables (খুবই জরুরি, যাতে পাসওয়ার্ড লিক না হয়)
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Build folders
+dist/
+build/
+out/
+
+# IDE Settings
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Temporary files
+.npm
+.eslintcache
+.stylelintcache
