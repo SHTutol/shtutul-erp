@@ -224,7 +224,7 @@ service cloud.firestore {
     switch (currentView) {
       case 'DASHBOARD': return <DashboardHome onViewChange={setCurrentView} activeUserCount={activeUsers.length} />;
       case 'REQ_LIST': return <RequisitionList requisitions={requisitions} onDelete={(id) => deleteFromCloud('requisitions', id)} onAdd={() => { setEditingRequisition(null); setCurrentView('REQUISITION'); }} onEdit={(req) => { setEditingRequisition(req); setCurrentView('REQUISITION'); }} onView={(req) => { setViewingRequisition(req); setCurrentView('VIEW_REQUISITION'); }} onPreview={(req) => { setViewingRequisition(req); setCurrentView('VIEW_REQUISITION'); setTimeout(() => window.print(), 800); }} onViewChange={setCurrentView} onUpdateStatus={(id, status) => { const req = requisitions.find(r => r.id === id); if (req) saveToCloud('requisitions', {...req, status}); }} />;
-      case 'REQUISITION': return <RequisitionForm onViewChange={setCurrentView} onSave={(data) => { saveToCloud('requisitions', data); setCurrentView('REQ_LIST'); }} editingData={editingRequisition} nextReqNo={`REQ-00${requisitions.length + 1}`} availableUnits={units} availablePayees={payees} availableSisters={sisters} />;
+      case 'REQUISITION': return <RequisitionForm onViewChange={setCurrentView} onSave={(data) => { saveToCloud('requisitions', data); setCurrentView('REQ_LIST'); }} editingData={editingRequisition} nextReqNo={`REQ-${(requisitions.length + 1).toString().padStart(3, '0')}`} availableUnits={units} availablePayees={payees} availableSisters={sisters} />;
       case 'VIEW_REQUISITION': return <RequisitionForm onViewChange={setCurrentView} editingData={viewingRequisition} readOnly={true} availableUnits={units} availablePayees={payees} availableSisters={sisters} />;
       case 'DV_LIST': return <DebitVoucherList vouchers={debitVouchers} onDelete={(id) => deleteFromCloud('vouchers', id)} onAdd={() => { setEditingDV(null); setCurrentView('DEBIT_VOUCHER'); }} onEdit={(dv) => { setEditingDV(dv); setCurrentView('DEBIT_VOUCHER'); }} onView={(dv) => { setViewingDV(dv); setCurrentView('VIEW_DV'); }} onPreview={(dv) => { setViewingDV(dv); setCurrentView('VIEW_DV'); setTimeout(() => window.print(), 800); }} onViewChange={setCurrentView} onUpdateStatus={(id, status) => { const dv = debitVouchers.find(v => v.id === id); if (dv) saveToCloud('vouchers', {...dv, status}); }} />;
       case 'DEBIT_VOUCHER': return <DebitVoucher onViewChange={setCurrentView} onSave={(newData) => { saveToCloud('vouchers', newData); setCurrentView('DV_LIST'); }} editingData={editingDV} nextDVNo={`DV-00${debitVouchers.length + 1}/25`} availableUnits={units} availablePayees={payees} availableSisters={sisters} />;
@@ -274,7 +274,7 @@ service cloud.firestore {
               <div className="transition-transform group-hover:scale-110">{item.icon}</div>
               <span className={`font-black text-xs uppercase tracking-widest transition-all duration-300 whitespace-nowrap ${isSidebarOpen ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-10 pointer-events-none'}`}>{item.label}</span>
             </button>
-          ))}
+          ))} 
         </nav>
 
         {/* Online Users Section */}
