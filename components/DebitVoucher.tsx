@@ -135,7 +135,7 @@ export const DebitVoucher: React.FC<DebitVoucherProps> = ({
         <div className="bg-white p-0 shadow-2xl overflow-hidden rounded-xl mb-20 print:shadow-none print:m-0">
           <div className="debit-voucher-paper font-serif text-black bg-white flex flex-col h-full relative border border-gray-100 print:border-none">
             <div className="text-center mb-2">
-              <h1 className="text-[18px] font-black leading-tight uppercase mb-0">{data.sisterConcern || 'AZLAN KNIT DYEING LTD.'}</h1>
+              <h1 className="text-[18px] font-black leading-tight uppercase mb-0">{data.sisterConcern || 'No Sister Concern'}</h1>
               <h2 className="text-[13px] font-bold uppercase mt-0 mb-0">{data.unit || 'KNIT DYEING UNIT'}</h2>
               <p className="text-[9px] font-medium">House no. 315, Road No. 4, Baridhara DOHS, Dhaka-1206</p>
             </div>
@@ -144,7 +144,7 @@ export const DebitVoucher: React.FC<DebitVoucherProps> = ({
               <div className="flex items-center gap-2 mt-auto">
                 <span className="text-[10px] font-bold">No.</span>
                 <div className="w-32 border border-black px-2 py-1 text-center font-bold text-[13px] h-[28px] flex items-center justify-center">
-                  {data.no.split('-').pop()}
+                  {data?.no ? data.no.split('-').pop() : ''}ূ
                 </div>
               </div>
 

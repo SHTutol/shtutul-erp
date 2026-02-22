@@ -242,12 +242,12 @@ service cloud.firestore {
         list.forEach(s => saveToCloud('sisters', s));
       }} onViewChange={setCurrentView} availablePayees={payees} />;
       case 'UNIT_ENTRY': return <UnitEntry units={units} onUpdateUnits={(list) => {
-        const existingIds = list.map(u => u.id);
+        const existingIds = list.map((u: UnitRecord) => u.id);
         units.forEach(u => { if (!existingIds.includes(u.id)) deleteFromCloud('units', u.id); });
         list.forEach(u => saveToCloud('units', u));
       }} onViewChange={setCurrentView} />;
       case 'USER_MANAGEMENT': return <UserManagement users={users} onUpdateUsers={(list) => {
-        const existingIds = list.map(u => u.id);
+        const existingIds = list.map((u: any) => u.id);
         users.forEach(u => { if (!existingIds.includes(u.id)) deleteFromCloud('users', u.id); });
         list.forEach(u => saveToCloud('users', u));
       }} onViewChange={setCurrentView} />;

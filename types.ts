@@ -8,7 +8,9 @@ export interface User {
   avatar?: string;
   lastLogin?: string;
   permissions: string[]; // List of view IDs the user can access
+  lastSeen?: any;
 }
+   
 
 export interface RequisitionData {
   id: string;
@@ -36,6 +38,7 @@ export interface PayeeRecord {
   sl: number;
   name: string;
   phone: string;
+  particulars?: string;
 }
 
 export interface SisterRecord {
@@ -56,12 +59,15 @@ export interface VoucherRow {
 
 export interface DebitVoucherData {
   id: string;
-  no: string; // DV-0001/25 format
+  no: string; 
   date: string;
   paidTo: string;
   sisterConcern: string;
   unit: string;
   paymentType: string;
+  paymentNo: string;      // এটি যোগ করুন (চেক নম্বর বা পেমেন্ট রেফারেন্সের জন্য)
+  chequeDate: string;     // এটি যোগ করুন
+  bankName: string;       // এটি যোগ করুন
   paymentDate: string;
   bankAccountNo: string;
   for: string;

@@ -15,6 +15,7 @@ import {
 
 interface DashboardHomeProps {
   onViewChange: (view: ViewType) => void;
+  activeUserCount: number;
 }
 
 export const DashboardHome: React.FC<DashboardHomeProps> = ({ onViewChange }) => {
