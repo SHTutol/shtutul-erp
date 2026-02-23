@@ -284,68 +284,68 @@ export const RequisitionForm: React.FC<RequisitionFormProps> = ({
 
       {readOnly && (
         <div className="w-full flex flex-col items-center pt-0 print:pt-0">
-          <div className="no-print mb-4 w-full max-w-[8.2in] flex justify-between items-center bg-white p-4 rounded-3xl border border-slate-200 shadow-xl">
+          <div className="no-print mb-2 w-full max-w-[8.2in] flex justify-between items-center bg-white p-4 rounded-3xl border border-slate-200 shadow-xl">
              <button onClick={() => onViewChange?.('REQ_LIST')} className="p-2.5 bg-slate-100 text-slate-600 rounded-xl hover:bg-slate-200 transition-all"><ArrowLeft size={18} /></button>
              <button onClick={handlePrint} className="flex items-center gap-2 px-8 py-3 bg-slate-900 text-white font-bold rounded-2xl text-xs hover:bg-slate-800 transition-all shadow-2xl active:scale-95 uppercase">
                <Printer size={16} /> Print Voucher
              </button>
           </div>
           
-          <div className="bg-white p-0 print:p-0 print:m-0 print:shadow-none shadow-2xl overflow-hidden rounded-xl mb-20 print:mb-0">
+          <div className="bg-white p-0 print:p-0 print:m-0 print:shadow-none shadow-xl overflow-hidden rounded-xl mb-10 print:mb-0">
             <div className="requisition-paper bg-white text-black font-serif">
               
-              <div className="text-center mb-6">
+              <div className="text-center mb-2">
                 <h1 className="text-[34px] font-bold uppercase leading-tight mb-0 tracking-tight">{data.sisterConcern || 'SHTutol ERP SYSTEM'}</h1>
                 <h2 className="text-[20px] font-bold uppercase tracking-[0.1em] mt-0 mb-1">{data.unit || 'UNIT-2'}</h2>
-                <div className="inline-block border-b border-black pb-0.5"><h3 className="text-[16px] font-bold uppercase tracking-[0.2em] italic underline">REQUISITION FORM</h3></div>
+                <div className="inline-block border-b border-black pb-0.5"><h3 className="text-[16px] font-bold uppercase tracking-[0.2em] italic">REQUISITION FORM</h3></div>
               </div>
 
-              <div className="flex justify-between items-end mb-6 font-bold px-1">
-                <div className="flex items-center gap-3">
+              <div className="flex justify-between items-end mb-2 font-bold px-1">
+                <div className="flex items-center gap-2">
                   <span className="text-[12px] uppercase font-bold">DATE:</span>
-                  <div className="px-3 py-0.5 min-w-[120px] text-center font-bold text-[16px] border-b border-black">
+                  <div className="px-3 py-0.5 min-w-[120px] text-center font-bold text-[14px] border-b border-black">
                     {previewDate}
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="text-[12px] font-bold uppercase">REQUISITION NO:</span>
-                  <span className="min-w-[60px] text-center font-bold text-[20px] border-b border-black">{data.requisitionNo.split('-').pop() || '001'}</span>
+                  <span className="min-w-[60px] text-center font-bold text-[14px] border-b border-black">{data.requisitionNo.split('-').pop() || '001'}</span>
                 </div>
               </div>
 
-              <div className="space-y-4 px-1">
-                <div className="flex items-end gap-3 h-8">
+              <div className="space-y-2 px-1">
+                <div className="flex items-end gap-1 h-6">
                   <span className="whitespace-nowrap font-bold uppercase text-[12px]">NAME OF PAYEE:,</span>
                   <div className="flex-grow border-b border-black font-bold text-[16px] uppercase px-2 italic tracking-tight">
                     {data.nameOfPayee}
                   </div>
                 </div>
 
-                <div className="flex items-end gap-3 h-8">
+                <div className="flex items-end gap-1 h-6">
                   <span className="whitespace-nowrap font-bold uppercase text-[12px]">THROUGH:</span>
-                  <div className="flex-grow border-b border-black font-bold text-[16px] uppercase px-2 italic">
+                  <div className="flex-grow border-b border-black font-bold text-[14px] uppercase px-2 italic">
                     {data.through}
                   </div>
                 </div>
 
                 <div className="flex flex-col gap-0.5">
-                  <div className="flex items-end gap-2 h-8">
+                  <div className="flex items-end gap-1 h-6">
                     <span className="whitespace-nowrap font-bold uppercase text-[12px]">PURPOSE:</span>
-                    <div className="flex-grow border-b border-black font-bold text-[16px] uppercase px-2 italic h-full flex items-end">
+                    <div className="flex-grow border-b border-black font-bold text-[14px] uppercase px-2 italic h-full flex items-end">
                       {data.purpose}
                     </div>
                   </div>
-                  <div className="border-b border-black h-8"></div>
+                  <div className="border-b border-black h-6"></div>
                 </div>
 
-                <div className="flex items-end justify-between gap-3 pt-2">
-                  <div className="flex items-end gap-3 flex-grow h-8">
+                <div className="flex items-end justify-between gap-1 pt-2">
+                  <div className="flex items-end gap-2 flex-grow h-6">
                     <span className="whitespace-nowrap font-bold uppercase text-[12px]">TYPE OF REQUISITION:.</span>
-                    <div className="flex-grow border-b border-black font-bold text-[16px] uppercase px-2 italic">
+                    <div className="flex-grow border-b border-black font-bold text-[14px] uppercase px-2 italic">
                       {data.typeOfRequisition}
                     </div>
                   </div>
-                  <div className="flex items-end gap-3 h-8">
+                  <div className="flex items-end gap-2 h-6">
                     <span className="whitespace-nowrap font-bold uppercase text-[12px]">AMOUNT TK:</span>
                     <div className="w-32 border-b border-black font-bold text-[22px] text-right px-2 italic">
                       {data.amountTk.toLocaleString()}/-
@@ -353,25 +353,24 @@ export const RequisitionForm: React.FC<RequisitionFormProps> = ({
                   </div>
                 </div>
 
-                <div className="flex items-end gap-3 pt-2 h-8">
+                <div className="flex items-end gap-2 pt-2 h-6">
                   <span className="whitespace-nowrap font-bold uppercase text-[12px]">AMOUNT IN WORDS.</span>
-                  <div className="flex-grow border-b border-black font-bold uppercase text-[16px] px-2 italic underline leading-tight">
+                  <div className="flex-grow border-b border-black font-bold uppercase text-[14px] px-2 italic">
                     {numberToWords(data.amountTk)}
                   </div>
                 </div>
 
-                <div className="flex items-end gap-3 pt-2 h-8">
-                  <span className="whitespace-nowrap font-bold uppercase text-[12px]">INDENTED BY</span>
-                  <div className="w-48 border-b border-black"></div>
-                </div>
+                <div className="flex items-end gap-2 pt-2 h-6">
+                  <span className="whitespace-nowrap font-bold uppercase text-[12px]">INDENTED BY :</span>
+                  </div>
               </div>
 
-              <div className="mt-8 text-center">
+              <div className="mt-4 text-center">
                 <p className="font-bold text-[13px] mb-1">Recommended by</p>
                 <p className="font-bold text-[10px] uppercase tracking-widest text-black/80">CHECKED BY /MANAGER/AGM/DGM/GM/SR. GM. GM (A/C)</p>
               </div>
 
-              <div className="mt-12 flex justify-between items-end px-1">
+              <div className="mt-10 flex justify-between items-end px-1">
                 <div className="flex flex-col items-center">
                   <div className="w-40 border-t border-black mb-1"></div>
                   <span className="text-[10px] font-bold uppercase tracking-widest">(SIGNATURE)</span>

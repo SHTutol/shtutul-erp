@@ -37,13 +37,13 @@ export const Login: React.FC<LoginProps> = ({ onLogin, users }) => {
     // Artificial delay to show processing
     setTimeout(() => {
       // 1. Check cloud users first
-      const foundUser = users.find(u => u.username.toLowerCase() === username.toLowerCase() && u.password === password);
+      const foundUser = users.find(u => u.username?.toLowerCase() === username?.toLowerCase() && u.password === password);
 
       if (foundUser) {
         onLogin({ ...foundUser, permissions: foundUser.permissions || ['DASHBOARD'] });
       } 
       // 2. Fallback for emergency admin access if Cloud is failing
-      else if (username.toLowerCase() === 'admin' && password === '123') {
+      else if (username?.toLowerCase() === 'admin' && password === '123') {
         onLogin({ 
           id: 'admin', 
           name: 'System Admin (Local)', 

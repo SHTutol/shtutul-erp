@@ -133,9 +133,9 @@ export const DebitVoucher: React.FC<DebitVoucherProps> = ({
         <div className="bg-white p-0 shadow-2xl overflow-hidden rounded-xl mb-20 print:shadow-none print:m-0">
           <div className="debit-voucher-paper font-serif text-black bg-white flex flex-col h-full relative border border-gray-100 print:border-none">
             <div className="text-center mb-2">
-              <h1 className="text-[18px] font-black leading-tight uppercase mb-0">{data.sisterConcern || 'AZLAN KNIT DYEING LTD.'}</h1>
+              <h1 className="text-[24px] font-black leading-tight uppercase mb-0">{data.sisterConcern || 'AZLAN KNIT DYEING LTD.'}</h1>
               <h2 className="text-[13px] font-bold uppercase mt-0 mb-0">{data.unit || 'KNIT DYEING UNIT'}</h2>
-              <p className="text-[9px] font-medium">House no. 315, Road No. 4, Baridhara DOHS, Dhaka-1206</p>
+              <p className="text-[11px] font-medium">House no. 315, Road No. 4, Baridhara DOHS, Dhaka-1206</p>
             </div>
 
             <div className="flex justify-between items-start px-1 mt-1 mb-1">
@@ -158,8 +158,8 @@ export const DebitVoucher: React.FC<DebitVoucherProps> = ({
               </div>
             </div>
 
-            <div className="text-center mt-1 mb-1">
-              <h3 className="text-[14px] font-black italic underline">Debit Voucher (Cash/Cheque)</h3>
+            <div className="text-center mt-2 mb-2">
+              <h3 className="text-[14px] font-black">Debit Voucher (Cash/Cheque)</h3>
             </div>
 
             <div className="space-y-3 px-1 flex-grow">
@@ -211,14 +211,14 @@ export const DebitVoucher: React.FC<DebitVoucherProps> = ({
                         <div className="border-b border-black p-1">Amount</div>
                         <div className="flex">
                            <div className="flex-grow border-r border-black p-1">Tk.</div>
-                           <div className="w-8 p-1 text-[9px]">Ps.</div>
+                           <div className="w-10 p-1 text-[9px]">Ps.</div>
                         </div>
                       </th>
                       <th className="border border-black p-1 w-24">Signature of Recipient</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {[...Array(5)].map((_, i) => (
+                    {[...Array(7)].map((_, i) => (
                       <tr key={i} className="h-[22px]">
                         <td className="border border-black text-left px-2 font-bold italic uppercase">{i === 0 ? data.accountHead : ''}</td>
                         <td className="border border-black"></td>
@@ -243,7 +243,7 @@ export const DebitVoucher: React.FC<DebitVoucherProps> = ({
               </div>
             </div>
 
-            <div className="mt-6 mb-4 px-1 flex justify-between items-end text-[10px] font-bold w-full">
+            <div className="mt-10 mb-4 px-1 flex justify-between items-end text-[10px] font-bold w-full">
               <div className="flex flex-col items-center">
                 <div className="w-24 border-t border-black mb-1"></div>
                 <span>Prepared by</span>
