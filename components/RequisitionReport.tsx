@@ -220,10 +220,10 @@ export const RequisitionReport: React.FC<RequisitionReportProps> = ({ onViewChan
       </div>
 
       {/* Main Table Area */}
-      <div className="w-full bg-white shadow-2xl md:border md:border-slate-200 md:rounded-[2.5rem] overflow-hidden print-area flex flex-col">
+      <div className="w-full bg-white shadow-2xl md:border md:border-slate-200 md:rounded-[2.5rem] overflow-hidden print-area report-landscape flex flex-col">
         
         {/* Hidden Print Header */}
-        <div className="hidden print:flex flex-col items-center mb-10 w-full text-center">
+        <div className="hidden print:flex flex-col items-center mb-4 w-full text-center">
           <div className="flex items-center gap-4 mb-2">
             <div className="p-3 bg-slate-900 rounded-xl text-white">
               <Building size={32} />
@@ -237,7 +237,7 @@ export const RequisitionReport: React.FC<RequisitionReportProps> = ({ onViewChan
           <h2 className="text-2xl font-black uppercase tracking-[0.2em] italic mb-1">Requisition Ledger Report</h2>
         </div>
 
-        <div className="overflow-x-auto ">
+        <div className="overflow-x-auto">
           <table className="w-full border-collapse">
             <thead>
               <tr className="text-white font-black text-[11px] uppercase tracking-wider text-center print:text-black">
@@ -268,6 +268,15 @@ export const RequisitionReport: React.FC<RequisitionReportProps> = ({ onViewChan
                 </tr>
               ))}
             </tbody>
+            <tfoot className="bg-slate-50 print:bg-slate-100">
+              <tr className="border-t-2 border-slate-200 print:border-slate-400">
+                <td colSpan={7} className="px-4 py-5 text-right font-black text-xs uppercase text-slate-900 tracking-widest">Total Amount</td>
+                <td className="px-4 py-5 text-right font-black text-xl text-blue-600 print:text-black tabular-nums">
+                  <span className="text-slate-500 text-sm mr-1">৳</span>
+                  {totalAmount.toLocaleString()}
+                </td>
+              </tr>
+            </tfoot>
           </table>
         </div>
       </div>

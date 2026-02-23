@@ -40,6 +40,15 @@ export const RequisitionList: React.FC<RequisitionListProps> = ({
   onViewChange
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
+  const [isAdvSearchOpen, setIsAdvSearchOpen] = useState(false);
+  const [advSearch, setAdvSearch] = useState({ 
+    ref: '', 
+    payee: '', 
+    dateMode: 'EQUAL' as 'EQUAL' | 'BETWEEN',
+    startDate: '',
+    endDate: ''
+  });
+  const [appliedAdvSearch, setAppliedAdvSearch] = useState({ ...advSearch });
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
 
@@ -83,6 +92,35 @@ export const RequisitionList: React.FC<RequisitionListProps> = ({
 
   const filtered = requisitions.filter(r => {
     const term = (searchTerm || '').toLowerCase().trim();
+    
+    // Advanced Search Logic (Applied only on Search button click)
+    const matchesAdvRef = !appliedAdvSearch.ref || (r.requisitionNo || '').toLowerCase().includes(appliedAdvSearch.ref.toLowerCase());
+    const matchesAdvPayee = !appliedAdvSearch.payee || (r.nameOfPayee || '').toLowerCase().includes(appliedAdvSearch.payee.toLowerCase());
+    
+    let matchesAdvDate = true;
+    if (appliedAdvSearch.startDate) {
+      const reqDate = new Date(r.date);
+      const start = new Date(appliedAdvSearch.startDate);
+      
+      if (appliedAdvSearch.dateMode === 'EQUAL') {
+        matchesAdvDate = r.date === appliedAdvSearch.startDate;
+      } else if (appliedAdvSearch.dateMode === 'BETWEEN' && appliedAdvSearch.endDate) {
+        const end = new Date(appliedAdvSearch.endDate);
+        reqDate.setHours(0,0,0,0);
+        start.setHours(0,0,0,0);
+        end.setHours(23,59,59,999);
+        matchesAdvDate = reqDate >= start && reqDate <= end;
+      } else if (appliedAdvSearch.dateMode === 'BETWEEN') {
+        reqDate.setHours(0,0,0,0);
+        start.setHours(0,0,0,0);
+        matchesAdvDate = reqDate >= start;
+      }
+    }
+    
+    const matchesAdv = matchesAdvRef && matchesAdvPayee && matchesAdvDate;
+
+    if (!matchesAdv) return false;
+
     const matchesSearch = 
       (r.requisitionNo || '').toLowerCase().includes(term) ||
       (r.nameOfPayee || '').toLowerCase().includes(term) ||
@@ -91,6 +129,12 @@ export const RequisitionList: React.FC<RequisitionListProps> = ({
     if (term !== '') {
       return matchesSearch;
     }
+    
+    // If advanced search is active, show all matching regardless of status
+    if (appliedAdvSearch.ref || appliedAdvSearch.startDate || appliedAdvSearch.payee) {
+      return true;
+    }
+
     return (r.status === 'Pending' || !r.status);
   });
 
@@ -177,11 +221,114 @@ export const RequisitionList: React.FC<RequisitionListProps> = ({
 
         <button 
           onClick={() => window.print()}
-          className="flex items-center gap-1.5 px-2 py-1.5 hover:bg-gray-200 text-[#003366] font-medium text-[13px] transition-colors"
+          className="flex items-center gap-1.5 px-2 py-1.5 hover:bg-gray-200 text-[#003366] font-medium text-[13px] border-r border-gray-300 transition-colors"
         >
           <Printer size={20} className="text-gray-600" /> <span>Print List</span>
         </button>
+
+        <button 
+          onClick={() => setIsAdvSearchOpen(!isAdvSearchOpen)}
+          className={`flex items-center gap-1.5 px-3 py-1.5 font-medium text-[13px] transition-colors ${isAdvSearchOpen ? 'bg-blue-600 text-white' : 'hover:bg-gray-200 text-[#003366]'}`}
+        >
+          <Search size={18} className={isAdvSearchOpen ? "text-white" : "text-blue-600"} /> <span>Adv. Search</span>
+        </button>
       </div>
+
+      {/* Advanced Search Panel */}
+      {isAdvSearchOpen && (
+        <div className="no-print bg-slate-50 border-b border-gray-300 p-4 animate-in slide-in-from-top duration-300">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="flex flex-col gap-1">
+              <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Ref Number</label>
+              <input 
+                type="text"
+                placeholder="E.G. REQ-001"
+                value={advSearch.ref}
+                onChange={(e) => setAdvSearch(prev => ({ ...prev, ref: e.target.value }))}
+                className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-xs font-bold text-slate-700 outline-none uppercase focus:border-blue-500"
+              />
+            </div>
+            
+            <div className="flex flex-col gap-1">
+              <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Payee Name</label>
+              <input 
+                type="text"
+                placeholder="SEARCH PAYEE..."
+                value={advSearch.payee}
+                onChange={(e) => setAdvSearch(prev => ({ ...prev, payee: e.target.value }))}
+                className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-xs font-bold text-slate-700 outline-none uppercase focus:border-blue-500"
+              />
+            </div>
+
+            <div className="flex flex-col gap-1">
+              <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Date Mode</label>
+              <div className="flex p-1 bg-gray-200 rounded-lg h-[34px]">
+                <button 
+                  onClick={() => setAdvSearch(prev => ({ ...prev, dateMode: 'EQUAL' }))} 
+                  className={`flex-1 text-[9px] font-black rounded-md transition-all ${advSearch.dateMode === 'EQUAL' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500'}`}
+                >
+                  SINGLE
+                </button>
+                <button 
+                  onClick={() => setAdvSearch(prev => ({ ...prev, dateMode: 'BETWEEN' }))} 
+                  className={`flex-1 text-[9px] font-black rounded-md transition-all ${advSearch.dateMode === 'BETWEEN' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500'}`}
+                >
+                  RANGE
+                </button>
+              </div>
+            </div>
+
+            <div className="flex gap-2">
+              <div className="flex-1 flex flex-col gap-1">
+                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">
+                  {advSearch.dateMode === 'EQUAL' ? 'Date' : 'Start Date'}
+                </label>
+                <input 
+                  type="date"
+                  value={advSearch.startDate}
+                  onChange={(e) => setAdvSearch(prev => ({ ...prev, startDate: e.target.value }))}
+                  className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-xs font-bold text-slate-700 outline-none focus:border-blue-500"
+                />
+              </div>
+              {advSearch.dateMode === 'BETWEEN' && (
+                <div className="flex-1 flex flex-col gap-1">
+                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">End Date</label>
+                  <input 
+                    type="date"
+                    value={advSearch.endDate}
+                    onChange={(e) => setAdvSearch(prev => ({ ...prev, endDate: e.target.value }))}
+                    className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-xs font-bold text-slate-700 outline-none focus:border-blue-500"
+                  />
+                </div>
+              )}
+            </div>
+          </div>
+          <div className="mt-4 flex justify-end gap-3 border-t border-gray-200 pt-3">
+            <button 
+              onClick={() => {
+                const reset = { ref: '', payee: '', dateMode: 'EQUAL' as const, startDate: '', endDate: '' };
+                setAdvSearch(reset);
+                setAppliedAdvSearch(reset);
+              }}
+              className="px-6 py-2 bg-gray-200 text-gray-600 rounded-xl text-[11px] font-black uppercase hover:bg-gray-300 transition-all flex items-center gap-2"
+            >
+              <RotateCcw size={14} /> Reset Filters
+            </button>
+            <button 
+              onClick={() => setAppliedAdvSearch({ ...advSearch })}
+              className="px-8 py-2 bg-blue-600 text-white rounded-xl text-[11px] font-black uppercase hover:bg-blue-700 transition-all flex items-center gap-2 shadow-lg shadow-blue-500/20"
+            >
+              <Search size={14} /> Search Now
+            </button>
+            <button 
+              onClick={() => setIsAdvSearchOpen(false)}
+              className="px-6 py-2 bg-slate-800 text-white rounded-xl text-[11px] font-black uppercase hover:bg-slate-900 transition-all"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Global Status Banner */}
       {searchTerm.trim() !== '' && (

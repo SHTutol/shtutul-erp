@@ -43,6 +43,15 @@ export const DebitVoucherList: React.FC<DebitVoucherListProps> = ({
   onViewChange
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
+  const [isAdvSearchOpen, setIsAdvSearchOpen] = useState(false);
+  const [advSearch, setAdvSearch] = useState({ 
+    ref: '', 
+    payee: '', 
+    dateMode: 'EQUAL' as 'EQUAL' | 'BETWEEN',
+    startDate: '',
+    endDate: ''
+  });
+  const [appliedAdvSearch, setAppliedAdvSearch] = useState({ ...advSearch });
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
 
@@ -81,15 +90,50 @@ export const DebitVoucherList: React.FC<DebitVoucherListProps> = ({
   };
 
   const filtered = vouchers.filter(v => {
-    const term = searchTerm.toLowerCase().trim();
-    const matchesSearch = v.no.toLowerCase().includes(term) ||
-                          v.paidTo.toLowerCase().includes(term) ||
-                          v.for.toLowerCase().includes(term);
+    const term = (searchTerm || '').toLowerCase().trim();
+    
+    // Advanced Search Logic (Applied only on Search button click)
+    const matchesAdvRef = !appliedAdvSearch.ref || (v.no || '').toLowerCase().includes(appliedAdvSearch.ref.toLowerCase());
+    const matchesAdvPayee = !appliedAdvSearch.payee || (v.paidTo || '').toLowerCase().includes(appliedAdvSearch.payee.toLowerCase());
+    
+    let matchesAdvDate = true;
+    if (appliedAdvSearch.startDate) {
+      const vDate = new Date(v.date);
+      const start = new Date(appliedAdvSearch.startDate);
+      
+      if (appliedAdvSearch.dateMode === 'EQUAL') {
+        matchesAdvDate = v.date === appliedAdvSearch.startDate;
+      } else if (appliedAdvSearch.dateMode === 'BETWEEN' && appliedAdvSearch.endDate) {
+        const end = new Date(appliedAdvSearch.endDate);
+        vDate.setHours(0,0,0,0);
+        start.setHours(0,0,0,0);
+        end.setHours(23,59,59,999);
+        matchesAdvDate = vDate >= start && vDate <= end;
+      } else if (appliedAdvSearch.dateMode === 'BETWEEN') {
+        vDate.setHours(0,0,0,0);
+        start.setHours(0,0,0,0);
+        matchesAdvDate = vDate >= start;
+      }
+    }
+    
+    const matchesAdv = matchesAdvRef && matchesAdvPayee && matchesAdvDate;
+
+    if (!matchesAdv) return false;
+
+    const matchesSearch = (v.no || '').toLowerCase().includes(term) ||
+                          (v.paidTo || '').toLowerCase().includes(term) ||
+                          (v.for || '').toLowerCase().includes(term);
     
     // If searching, show all matching records (Global Search)
     if (term !== '') {
       return matchesSearch;
     }
+
+    // If advanced search is active, show all matching regardless of status
+    if (appliedAdvSearch.ref || appliedAdvSearch.startDate || appliedAdvSearch.payee) {
+      return true;
+    }
+
     // Otherwise, show only pending items (Default worklist)
     return (v.status === 'Pending' || !v.status);
   });
@@ -100,7 +144,7 @@ export const DebitVoucherList: React.FC<DebitVoucherListProps> = ({
   const isPreviewDisabled = !selectedDV || selectedDV.status !== 'Approved';
 
   return (
-    <div className="w-full flex-grow flex flex-col bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden animate-in fade-in duration-500">
+    <div className="w-full flex-grow flex flex-col bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden animate-in fade-in duration-500 h-full">
       
       {/* ERP Style Toolbar */}
       <div className="no-print bg-[#F3F3F3] border-b border-gray-300 p-1.5 flex items-center flex-wrap gap-x-1">
@@ -116,8 +160,11 @@ export const DebitVoucherList: React.FC<DebitVoucherListProps> = ({
           />
         </div>
 
-        <button className="flex items-center gap-1.5 px-3 py-1.5 hover:bg-gray-200 text-[#003366] font-semibold text-[13px] border-r border-gray-300 transition-colors">
-          <FileSearch size={18} className="text-blue-500" /> <span>Adv. Search</span>
+        <button 
+          onClick={() => setIsAdvSearchOpen(!isAdvSearchOpen)}
+          className={`flex items-center gap-1.5 px-3 py-1.5 font-semibold text-[13px] border-r border-gray-300 transition-colors ${isAdvSearchOpen ? 'bg-blue-600 text-white' : 'hover:bg-gray-200 text-[#003366]'}`}
+        >
+          <FileSearch size={18} className={isAdvSearchOpen ? "text-white" : "text-blue-500"} /> <span>Adv. Search</span>
         </button>
 
         <button onClick={onAdd} className="flex items-center gap-1.5 px-3 py-1.5 hover:bg-gray-200 text-[#003366] font-semibold text-[13px] border-r border-gray-300 transition-colors">
@@ -180,6 +227,102 @@ export const DebitVoucherList: React.FC<DebitVoucherListProps> = ({
         </button>
       </div>
 
+      {/* Advanced Search Panel */}
+      {isAdvSearchOpen && (
+        <div className="no-print bg-slate-50 border-b border-gray-300 p-4 animate-in slide-in-from-top duration-300">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="flex flex-col gap-1">
+              <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Voucher No</label>
+              <input 
+                type="text"
+                placeholder="E.G. DV-001"
+                value={advSearch.ref}
+                onChange={(e) => setAdvSearch(prev => ({ ...prev, ref: e.target.value }))}
+                className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-xs font-bold text-slate-700 outline-none uppercase focus:border-blue-500"
+              />
+            </div>
+            
+            <div className="flex flex-col gap-1">
+              <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Paid To</label>
+              <input 
+                type="text" 
+                placeholder="SEARCH PAYEE..."
+                value={advSearch.payee}
+                onChange={(e) => setAdvSearch(prev => ({ ...prev, payee: e.target.value }))}
+                className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-xs font-bold text-slate-700 outline-none uppercase focus:border-blue-500"
+              />
+            </div>
+
+            <div className="flex flex-col gap-1">
+              <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Date Mode</label>
+              <div className="flex p-1 bg-gray-200 rounded-lg h-[34px]">
+                <button 
+                  onClick={() => setAdvSearch(prev => ({ ...prev, dateMode: 'EQUAL' }))} 
+                  className={`flex-1 text-[9px] font-black rounded-md transition-all ${advSearch.dateMode === 'EQUAL' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500'}`}
+                >
+                  SINGLE
+                </button>
+                <button 
+                  onClick={() => setAdvSearch(prev => ({ ...prev, dateMode: 'BETWEEN' }))} 
+                  className={`flex-1 text-[9px] font-black rounded-md transition-all ${advSearch.dateMode === 'BETWEEN' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500'}`}
+                >
+                  RANGE
+                </button>
+              </div>
+            </div>
+
+            <div className="flex gap-2">
+              <div className="flex-1 flex flex-col gap-1">
+                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">
+                  {advSearch.dateMode === 'EQUAL' ? 'Date' : 'Start Date'}
+                </label>
+                <input 
+                  type="date"
+                  value={advSearch.startDate}
+                  onChange={(e) => setAdvSearch(prev => ({ ...prev, startDate: e.target.value }))}
+                  className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-xs font-bold text-slate-700 outline-none focus:border-blue-500"
+                />
+              </div>
+              {advSearch.dateMode === 'BETWEEN' && (
+                <div className="flex-1 flex flex-col gap-1">
+                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">End Date</label>
+                  <input 
+                    type="date"
+                    value={advSearch.endDate}
+                    onChange={(e) => setAdvSearch(prev => ({ ...prev, endDate: e.target.value }))}
+                    className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-xs font-bold text-slate-700 outline-none focus:border-blue-500"
+                  />
+                </div>
+              )}
+            </div>
+          </div>
+          <div className="mt-4 flex justify-end gap-3 border-t border-gray-200 pt-3">
+            <button 
+              onClick={() => {
+                const reset = { ref: '', payee: '', dateMode: 'EQUAL' as const, startDate: '', endDate: '' };
+                setAdvSearch(reset);
+                setAppliedAdvSearch(reset);
+              }}
+              className="px-6 py-2 bg-gray-200 text-gray-600 rounded-xl text-[11px] font-black uppercase hover:bg-gray-300 transition-all flex items-center gap-2"
+            >
+              <RotateCcw size={14} /> Reset Filters
+            </button>
+            <button 
+              onClick={() => setAppliedAdvSearch({ ...advSearch })}
+              className="px-8 py-2 bg-blue-600 text-white rounded-xl text-[11px] font-black uppercase hover:bg-blue-700 transition-all flex items-center gap-2 shadow-lg shadow-blue-500/20"
+            >
+              <Search size={14} /> Search Now
+            </button>
+            <button 
+              onClick={() => setIsAdvSearchOpen(false)}
+              className="px-6 py-2 bg-slate-800 text-white rounded-xl text-[11px] font-black uppercase hover:bg-slate-900 transition-all"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Global Status Banner */}
       {searchTerm.trim() !== '' && (
         <div className="bg-blue-50 border-b border-blue-100 px-6 py-2 flex items-center gap-2">
@@ -188,7 +331,7 @@ export const DebitVoucherList: React.FC<DebitVoucherListProps> = ({
         </div>
       )}
 
-      <div className="overflow-auto flex-grow max-h-[70vh]">
+      <div className="overflow-auto flex-grow max-h-[60vh]">
         <table className="w-full text-left border-collapse">
           <thead>
             <tr className="bg-slate-50 border-b border-slate-200 text-slate-500 font-bold text-[12px] uppercase tracking-widest sticky top-0 z-10">

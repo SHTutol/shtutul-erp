@@ -234,10 +234,10 @@ export const DebitVoucherReport: React.FC<DebitVoucherReportProps> = ({ onViewCh
       </div>
 
       {/* Main Table Area */}
-      <div className="w-full bg-white shadow-2xl md:border md:border-slate-200 md:rounded-[2.5rem] print-area flex flex-col">
+      <div className="w-full bg-white shadow-2xl md:border md:border-slate-200 md:rounded-[2.5rem] print-area report-landscape flex flex-col">
         
         {/* Hidden Print Header with Logo */}
-        <div className="hidden print:flex flex-col items-center mb-10 w-full text-center">
+        <div className="hidden print:flex flex-col items-center mb-4 w-full text-center">
           <div className="flex items-center gap-6 mb-4">
             <img src={LOGO_SRC} alt="SIM Group Logo" className="w-24 h-24 object-contain" />
             <div className="text-left">
