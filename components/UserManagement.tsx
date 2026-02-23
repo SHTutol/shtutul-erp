@@ -1,5 +1,4 @@
 
-// Add missing React import to fix 'Cannot find namespace React' error when using React.FC
 import React, { useState, useRef, useEffect } from 'react';
 import { ViewType } from '../App';
 import { User } from '../types';
@@ -20,7 +19,9 @@ import {
   Upload,
   Database,
   Cloud,
-  RefreshCw
+  RefreshCw,
+  Wifi,
+  WifiOff
 } from 'lucide-react';
 
 interface UserManagementProps {
@@ -142,8 +143,8 @@ export const UserManagement: React.FC<UserManagementProps> = ({ onViewChange, us
   };
 
   const filteredUsers = users.filter(u => 
-    u.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-    u.username.toLowerCase().includes(searchTerm.toLowerCase())
+    (u.name || '').toLowerCase().includes((searchTerm || '').toLowerCase()) || 
+    (u.username || '').toLowerCase().includes((searchTerm || '').toLowerCase())
   );
 
   return (
@@ -224,57 +225,67 @@ export const UserManagement: React.FC<UserManagementProps> = ({ onViewChange, us
                 <th className="px-6 py-4">Username</th>
                 <th className="px-6 py-4">Role</th>
                 <th className="px-6 py-4">Modules Access</th>
-                <th className="px-6 py-4 text-center">Cloud Status</th>
+                <th className="px-6 py-4 text-center">Status</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-              {filteredUsers.map((u) => (
-                <tr 
-                  key={u.id} 
-                  onClick={() => setSelectedId(u.id)}
-                  className={`group cursor-pointer transition-all ${
-                    selectedId === u.id ? 'bg-indigo-50' : 'hover:bg-slate-50'
-                  }`}
-                >
-                  <td className="px-6 py-4">
-                    <div className={`w-4 h-4 rounded border-2 transition-all flex items-center justify-center ${selectedId === u.id ? 'border-indigo-600 bg-indigo-600' : 'border-slate-300 group-hover:border-slate-400'}`}>
-                      {selectedId === u.id && <Check size={10} className="text-white" strokeWidth={4} />}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-3">
-                      <img src={u.avatar} alt="" className="w-10 h-10 rounded-full border border-slate-200" />
-                      <div className="flex flex-col">
-                        <span className="font-black text-slate-900 text-sm uppercase">{u.name}</span>
-                        <span className="text-[10px] text-slate-400 font-bold uppercase tracking-tighter">ID: {u.id}</span>
+              {filteredUsers.map((u) => {
+                const isOnline = u.lastSeen && (Date.now() - u.lastSeen < 60000);
+                return (
+                  <tr 
+                    key={u.id} 
+                    onClick={() => setSelectedId(u.id)}
+                    className={`group cursor-pointer transition-all ${
+                      selectedId === u.id ? 'bg-indigo-50' : 'hover:bg-slate-50'
+                    }`}
+                  >
+                    <td className="px-6 py-4">
+                      <div className={`w-4 h-4 rounded border-2 transition-all flex items-center justify-center ${selectedId === u.id ? 'border-indigo-600 bg-indigo-600' : 'border-slate-300 group-hover:border-slate-400'}`}>
+                        {selectedId === u.id && <Check size={10} className="text-white" strokeWidth={4} />}
                       </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <span className="font-bold text-slate-600 text-sm italic">{u.username}</span>
-                  </td>
-                  <td className="px-6 py-4">
-                    <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${
-                      u.role === 'System Admin' ? 'bg-purple-100 text-purple-700' : 'bg-slate-100 text-slate-700'
-                    }`}>
-                      <Shield size={10} /> {u.role}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="flex flex-wrap gap-1">
-                        {u.permissions.slice(0, 3).map(p => (
-                          <span key={p} className="px-1.5 py-0.5 bg-slate-100 border border-slate-200 rounded text-[9px] font-bold text-slate-500 uppercase">{p.replace('_', ' ')}</span>
-                        ))}
-                        {u.permissions.length > 3 && <span className="text-[9px] font-bold text-slate-400">+{u.permissions.length - 3} more</span>}
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-3">
+                        <img src={u.avatar} alt="" className="w-10 h-10 rounded-full border border-slate-200" />
+                        <div className="flex flex-col">
+                          <span className="font-black text-slate-900 text-sm uppercase">{u.name}</span>
+                          <span className="text-[10px] text-slate-400 font-bold uppercase tracking-tighter">ID: {u.id}</span>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className="font-bold text-slate-600 text-sm italic">{u.username}</span>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${
+                        u.role === 'System Admin' ? 'bg-purple-100 text-purple-700' : 'bg-slate-100 text-slate-700'
+                      }`}>
+                        <Shield size={10} /> {u.role}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex flex-wrap gap-1">
+                          {(u.permissions || []).slice(0, 3).map((p, idx) => (
+                            <span key={`${p}-${idx}`} className="px-1.5 py-0.5 bg-slate-100 border border-slate-200 rounded text-[9px] font-bold text-slate-500 uppercase">{p.replace('_', ' ')}</span>
+                          ))}
+                          {(u.permissions || []).length > 3 && <span className="text-[9px] font-bold text-slate-400">+{(u.permissions || []).length - 3} more</span>}
                     </div>
                   </td>
                   <td className="px-6 py-4 text-center">
                     <div className="flex items-center justify-center">
-                      <div className="w-2 h-2 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.5)]"></div>
+                      {isOnline ? (
+                        <span className="flex items-center gap-1.5 px-2 py-0.5 bg-green-50 text-green-600 border border-green-100 rounded-full text-[9px] font-black uppercase">
+                          <Wifi size={10} className="animate-pulse" /> Active
+                        </span>
+                      ) : (
+                        <span className="flex items-center gap-1.5 px-2 py-0.5 bg-slate-50 text-slate-400 border border-slate-100 rounded-full text-[9px] font-black uppercase">
+                          <WifiOff size={10} /> Offline
+                        </span>
+                      )}
                     </div>
                   </td>
                 </tr>
-              ))}
+              )})}
             </tbody>
           </table>
         </div>
