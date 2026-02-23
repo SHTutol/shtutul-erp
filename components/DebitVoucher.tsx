@@ -103,7 +103,7 @@ export const DebitVoucher: React.FC<DebitVoucherProps> = ({
     onSave?.(data);
   };
 
-  const filteredPayees = availablePayees.filter(p => p.name.toLowerCase().includes(payeeSearch.toLowerCase()));
+  const filteredPayees = availablePayees.filter(p => (p.name || '').toLowerCase().includes((payeeSearch || '').toLowerCase()));
 
   const formatDate = (dateStr: string) => {
     if (!dateStr) return '';
@@ -357,8 +357,8 @@ export const DebitVoucher: React.FC<DebitVoucherProps> = ({
                 />
                 {showPayeeList && filteredPayees.length > 0 && (
                   <div className="absolute top-full left-0 right-0 z-[100] mt-2 bg-white border-2 border-slate-200 rounded-3xl shadow-2xl max-h-60 overflow-y-auto">
-                    {filteredPayees.map((payee, idx) => (
-                      <button key={idx} type="button" onClick={() => handlePayeeSelect(payee.name)} className="w-full text-left px-8 py-5 hover:bg-slate-50 font-black text-slate-700 uppercase text-xs border-b border-slate-50 last:border-none">{payee.name}</button>
+                    {filteredPayees.map((payee) => (
+                      <button key={payee.id} type="button" onClick={() => handlePayeeSelect(payee.name)} className="w-full text-left px-8 py-5 hover:bg-slate-50 font-black text-slate-700 uppercase text-xs border-b border-slate-50 last:border-none">{payee.name}</button>
                     ))}
                   </div>
                 )}

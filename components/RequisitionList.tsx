@@ -82,11 +82,11 @@ export const RequisitionList: React.FC<RequisitionListProps> = ({
   };
 
   const filtered = requisitions.filter(r => {
-    const term = searchTerm.toLowerCase().trim();
+    const term = (searchTerm || '').toLowerCase().trim();
     const matchesSearch = 
-      r.requisitionNo.toLowerCase().includes(term) ||
-      r.nameOfPayee.toLowerCase().includes(term) ||
-      r.purpose.toLowerCase().includes(term);
+      (r.requisitionNo || '').toLowerCase().includes(term) ||
+      (r.nameOfPayee || '').toLowerCase().includes(term) ||
+      (r.purpose || '').toLowerCase().includes(term);
 
     if (term !== '') {
       return matchesSearch;
@@ -100,7 +100,7 @@ export const RequisitionList: React.FC<RequisitionListProps> = ({
   const isPreviewDisabled = !selectedReq || selectedReq.status !== 'Approved';
 
   return (
-    <div className="w-full flex flex-col bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden animate-in fade-in duration-500">
+    <div className="w-full flex flex-col bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden animate-in fade-in duration-500 h-full">
       
       {/* ERP Style Toolbar */}
       <div className="no-print bg-[#F3F3F3] border-b border-gray-300 p-1 flex items-center flex-wrap gap-x-1">

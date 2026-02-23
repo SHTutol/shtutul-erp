@@ -148,10 +148,10 @@ export const UserManagement: React.FC<UserManagementProps> = ({ onViewChange, us
   );
 
   return (
-    <div className="w-full max-w-[1200px] flex flex-col gap-6 animate-in fade-in duration-500">
+    <div className="w-full flex flex-col gap-6 animate-in fade-in duration-500 h-full">
       
       {/* Cloud Database Status Banner */}
-      <div className="bg-indigo-50 border border-indigo-200 rounded-2xl p-6 flex flex-col md:flex-row items-center justify-between gap-6 shadow-sm">
+      <div className="bg-indigo-50 border border-indigo-200 rounded-2xl p-6 flex flex-col md:flex-row items-center justify-between gap-6 shadow-sm shrink-0">
         <div className="flex items-center gap-4">
           <div className="w-12 h-12 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-600">
             <Cloud size={24} />
@@ -173,7 +173,7 @@ export const UserManagement: React.FC<UserManagementProps> = ({ onViewChange, us
         </div>
       </div>
 
-      <div className="w-full flex flex-col bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden relative">
+      <div className="w-full flex flex-col bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden relative flex-grow min-h-0">
         <div className="no-print bg-slate-50 border-b border-slate-200 p-4 flex items-center justify-between flex-wrap gap-4">
           <div className="flex items-center gap-3">
             <div className="relative group">
@@ -216,7 +216,7 @@ export const UserManagement: React.FC<UserManagementProps> = ({ onViewChange, us
           </div>
         </div>
 
-        <div className="overflow-auto max-h-[65vh]">
+        <div className="overflow-auto flex-grow">
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-slate-50 border-b border-slate-200 text-slate-500 font-bold text-[11px] uppercase tracking-widest sticky top-0 z-10">
