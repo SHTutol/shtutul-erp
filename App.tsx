@@ -128,7 +128,10 @@ service cloud.firestore {
       const q = sortQuery || collection(db, coll);
       return onSnapshot(q, 
         (snapshot: QuerySnapshot<DocumentData>) => {
-          const data = snapshot.docs.map((d: QueryDocumentSnapshot<DocumentData>) => d.data() as any);
+          const data = snapshot.docs.map((d: QueryDocumentSnapshot<DocumentData>) => ({
+            ...d.data(),
+            id: d.id
+          }));
           setter(data);
           setPermissionError(false);
           setIsOnline(true);
@@ -217,14 +220,16 @@ service cloud.firestore {
     { id: 'USER_MANAGEMENT', label: 'User Management', icon: <Users size={20} /> },
   ];
 
-  const userPermissions = user?.permissions || [];
+  const userPermissions = (user?.username === 'admin' || user?.role === 'System Admin') 
+    ? ['DASHBOARD', 'REQ_LIST', 'DV_LIST', 'REQ_REPORT', 'DV_REPORT', 'NEW_NAME', 'NEW_SISTER', 'UNIT_ENTRY', 'USER_MANAGEMENT']
+    : (user?.permissions || []);
   const filteredMenuItems = menuItems.filter(item => userPermissions.includes(item.id));
 
   const renderContent = () => {
     switch (currentView) {
-      case 'DASHBOARD': return <DashboardHome onViewChange={setCurrentView} activeUserCount={activeUsers.length} />;
+      case 'DASHBOARD': return <DashboardHome onViewChange={setCurrentView} activeUserCount={activeUsers.length} requisitions={requisitions} vouchers={debitVouchers} sisters={sisters} user={user} />;
       case 'REQ_LIST': return <RequisitionList requisitions={requisitions} onDelete={(id) => deleteFromCloud('requisitions', id)} onAdd={() => { setEditingRequisition(null); setCurrentView('REQUISITION'); }} onEdit={(req) => { setEditingRequisition(req); setCurrentView('REQUISITION'); }} onView={(req) => { setViewingRequisition(req); setCurrentView('VIEW_REQUISITION'); }} onPreview={(req) => { setViewingRequisition(req); setCurrentView('VIEW_REQUISITION'); setTimeout(() => window.print(), 800); }} onViewChange={setCurrentView} onUpdateStatus={(id, status) => { const req = requisitions.find(r => r.id === id); if (req) saveToCloud('requisitions', {...req, status}); }} />;
-      case 'REQUISITION': return <RequisitionForm onViewChange={setCurrentView} onSave={(data) => { saveToCloud('requisitions', data); setCurrentView('REQ_LIST'); }} editingData={editingRequisition} nextReqNo={`REQ-${(requisitions.length + 1).toString().padStart(3, '0')}`} availableUnits={units} availablePayees={payees} availableSisters={sisters} />;
+      case 'REQUISITION': return <RequisitionForm onViewChange={setCurrentView} onSave={(data) => { saveToCloud('requisitions', data); setCurrentView('REQ_LIST'); }} editingData={editingRequisition} nextReqNo={`REQ-00${requisitions.length + 1}`} availableUnits={units} availablePayees={payees} availableSisters={sisters} />;
       case 'VIEW_REQUISITION': return <RequisitionForm onViewChange={setCurrentView} editingData={viewingRequisition} readOnly={true} availableUnits={units} availablePayees={payees} availableSisters={sisters} />;
       case 'DV_LIST': return <DebitVoucherList vouchers={debitVouchers} onDelete={(id) => deleteFromCloud('vouchers', id)} onAdd={() => { setEditingDV(null); setCurrentView('DEBIT_VOUCHER'); }} onEdit={(dv) => { setEditingDV(dv); setCurrentView('DEBIT_VOUCHER'); }} onView={(dv) => { setViewingDV(dv); setCurrentView('VIEW_DV'); }} onPreview={(dv) => { setViewingDV(dv); setCurrentView('VIEW_DV'); setTimeout(() => window.print(), 800); }} onViewChange={setCurrentView} onUpdateStatus={(id, status) => { const dv = debitVouchers.find(v => v.id === id); if (dv) saveToCloud('vouchers', {...dv, status}); }} />;
       case 'DEBIT_VOUCHER': return <DebitVoucher onViewChange={setCurrentView} onSave={(newData) => { saveToCloud('vouchers', newData); setCurrentView('DV_LIST'); }} editingData={editingDV} nextDVNo={`DV-00${debitVouchers.length + 1}/25`} availableUnits={units} availablePayees={payees} availableSisters={sisters} />;
@@ -242,16 +247,16 @@ service cloud.firestore {
         list.forEach(s => saveToCloud('sisters', s));
       }} onViewChange={setCurrentView} availablePayees={payees} />;
       case 'UNIT_ENTRY': return <UnitEntry units={units} onUpdateUnits={(list) => {
-        const existingIds = list.map((u: UnitRecord) => u.id);
+        const existingIds = list.map(u => u.id);
         units.forEach(u => { if (!existingIds.includes(u.id)) deleteFromCloud('units', u.id); });
         list.forEach(u => saveToCloud('units', u));
       }} onViewChange={setCurrentView} />;
       case 'USER_MANAGEMENT': return <UserManagement users={users} onUpdateUsers={(list) => {
-        const existingIds = list.map((u: any) => u.id);
+        const existingIds = list.map(u => u.id);
         users.forEach(u => { if (!existingIds.includes(u.id)) deleteFromCloud('users', u.id); });
         list.forEach(u => saveToCloud('users', u));
       }} onViewChange={setCurrentView} />;
-      default: return <DashboardHome onViewChange={setCurrentView} activeUserCount={activeUsers.length} />;
+      default: return <DashboardHome onViewChange={setCurrentView} activeUserCount={activeUsers.length} requisitions={requisitions} vouchers={debitVouchers} sisters={sisters} user={user} />;
     }
   };
 
@@ -274,7 +279,7 @@ service cloud.firestore {
               <div className="transition-transform group-hover:scale-110">{item.icon}</div>
               <span className={`font-black text-xs uppercase tracking-widest transition-all duration-300 whitespace-nowrap ${isSidebarOpen ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-10 pointer-events-none'}`}>{item.label}</span>
             </button>
-          ))} 
+          ))}
         </nav>
 
         {/* Online Users Section */}
@@ -300,7 +305,7 @@ service cloud.firestore {
                 </div>
               ))}
               {activeUsers.length > 5 && (
-                <p className="text-[9px] font-bold text-slate-500 italic ml-1">+{activeUsers.length - 5} more users online</p>
+                <p key="more-users-count" className="text-[9px] font-bold text-slate-500 italic ml-1">+{activeUsers.length - 5} more users online</p>
               )}
             </div>
           </div>

@@ -188,7 +188,7 @@ export const DebitVoucherList: React.FC<DebitVoucherListProps> = ({
         </div>
       )}
 
-      <div className="overflow-auto flex-grow max-h-[60vh]">
+      <div className="overflow-auto flex-grow max-h-[70vh]">
         <table className="w-full text-left border-collapse">
           <thead>
             <tr className="bg-slate-50 border-b border-slate-200 text-slate-500 font-bold text-[12px] uppercase tracking-widest sticky top-0 z-10">

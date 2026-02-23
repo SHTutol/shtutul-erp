@@ -237,7 +237,7 @@ export const RequisitionReport: React.FC<RequisitionReportProps> = ({ onViewChan
           <h2 className="text-2xl font-black uppercase tracking-[0.2em] italic mb-1">Requisition Ledger Report</h2>
         </div>
 
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto ">
           <table className="w-full border-collapse">
             <thead>
               <tr className="text-white font-black text-[11px] uppercase tracking-wider text-center print:text-black">

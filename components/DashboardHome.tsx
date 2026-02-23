@@ -10,15 +10,29 @@ import {
   History, 
   Building,
   ArrowRight,
-  Zap
+  Zap,
+  Wifi
 } from 'lucide-react';
+
+import { RequisitionData, DebitVoucherData, SisterRecord, User } from '../types';
 
 interface DashboardHomeProps {
   onViewChange: (view: ViewType) => void;
-  activeUserCount: number;
+  activeUserCount?: number;
+  requisitions: RequisitionData[];
+  vouchers: DebitVoucherData[];
+  sisters: SisterRecord[];
+  user: User | null;
 }
 
-export const DashboardHome: React.FC<DashboardHomeProps> = ({ onViewChange }) => {
+export const DashboardHome: React.FC<DashboardHomeProps> = ({ 
+  onViewChange, 
+  activeUserCount = 1,
+  requisitions,
+  vouchers,
+  sisters,
+  user
+}) => {
   const [time, setTime] = useState(new Date());
 
   useEffect(() => {
@@ -26,19 +40,41 @@ export const DashboardHome: React.FC<DashboardHomeProps> = ({ onViewChange }) =>
     return () => clearInterval(timer);
   }, []);
 
+  const pendingVouchers = vouchers.filter(v => v.status === 'Pending').length;
+  const pendingReqs = requisitions.filter(r => r.status === 'Pending').length;
+
+  const totalReqAmount = requisitions.reduce((sum, r) => sum + (Number(r.amountTk) || 0), 0);
+
   const stats = [
-    { label: 'Total Requisitions', value: '1,284', icon: <TrendingUp className="text-blue-500" />, trend: '+12% from last month' },
-    { label: 'Pending Vouchers', value: '14', icon: <Clock className="text-amber-500" />, trend: 'Needs immediate attention' },
-    { label: 'Disbursed (Month)', value: '৳4,52,000', icon: <CheckCircle2 className="text-green-500" />, trend: 'Within budget limits' },
-    { label: 'Active Concerns', value: '7', icon: <Building className="text-purple-500" />, trend: 'All systems operational' },
+    { label: 'Total Requisitions', value: requisitions.length.toLocaleString(), icon: <TrendingUp className="text-blue-500" />, trend: `Total: ৳${totalReqAmount.toLocaleString()}` },
+    { label: 'Pending Vouchers', value: pendingVouchers.toString(), icon: <Clock className="text-amber-500" />, trend: `${pendingReqs} Req Pending Approval` },
+    { label: 'Active Sessions', value: activeUserCount.toString(), icon: <Wifi className="text-green-500 animate-pulse" />, trend: 'Live system users' },
+    { label: 'Active Concerns', value: sisters.length.toString(), icon: <Building className="text-purple-500" />, trend: 'All systems operational' },
   ];
 
-  const recentActivities = [
-    { id: 1, type: 'Requisition', title: 'Fuel for SIM Fabrics', amount: '৳15,000', time: '2 hours ago', status: 'Approved' },
-    { id: 2, type: 'Voucher', title: 'Stationery - SIM Knit Dyeing', amount: '৳2,450', time: '5 hours ago', status: 'Pending' },
-    { id: 3, type: 'Requisition', title: 'Raw Material - SIM Denim Ltd', amount: '৳1,20,000', time: 'Yesterday', status: 'Disbursed' },
-    { id: 4, type: 'System', title: 'New Sister Concern Added', amount: 'N/A', time: '2 days ago', status: 'Complete' },
-  ];
+  // Combine and sort activities
+  const allActivities = [
+    ...requisitions.map(r => ({
+      id: r.id,
+      type: 'Requisition',
+      title: `${r.purpose || 'No Purpose'} - ${r.sisterConcern || 'No Concern'}`,
+      amount: `৳${(Number(r.amountTk) || 0).toLocaleString()}`,
+      date: r.date ? new Date(r.date) : new Date(),
+      status: r.status || 'Pending'
+    })),
+    ...vouchers.map(v => ({
+      id: v.id,
+      type: 'Voucher',
+      title: `${v.accountHead || 'No Head'} - ${v.sisterConcern || 'No Concern'}`,
+      amount: `৳${(Number(v.amountTk) || 0).toLocaleString()}`,
+      date: v.date ? new Date(v.date) : new Date(),
+      status: v.status || 'Pending'
+    }))
+  ].sort((a, b) => {
+    const timeA = isNaN(a.date.getTime()) ? 0 : a.date.getTime();
+    const timeB = isNaN(b.date.getTime()) ? 0 : b.date.getTime();
+    return timeB - timeA;
+  }).slice(0, 6);
 
   const quickActions = [
     { id: 'REQUISITION', label: 'Create Requisition', color: 'bg-blue-600', icon: <PlusCircle size={24} /> },
@@ -63,7 +99,7 @@ export const DashboardHome: React.FC<DashboardHomeProps> = ({ onViewChange }) =>
               SHTutol <span className="text-indigo-400">ERP</span>
             </h1>
             <p className="text-slate-300 text-xl font-medium">
-              {getGreeting()}, <span className="text-white font-bold uppercase tracking-widest italic">Manager</span>. Welcome back.
+              {getGreeting()}, <span className="text-white font-bold uppercase tracking-widest italic">{user?.name || 'User'}</span>. Welcome back.
             </p>
           </div>
           <div className="text-right">
@@ -76,8 +112,8 @@ export const DashboardHome: React.FC<DashboardHomeProps> = ({ onViewChange }) =>
       </div>
 
       <div className="px-12 -mt-16 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 z-20">
-        {stats.map((stat, i) => (
-          <div key={i} className="bg-white p-6 rounded-2xl shadow-lg border border-slate-100">
+        {stats.map((stat) => (
+          <div key={stat.label} className="bg-white p-6 rounded-2xl shadow-lg border border-slate-100">
             <div className="flex justify-between items-start mb-4">
               <div className="p-3 bg-slate-50 rounded-xl">{stat.icon}</div>
             </div>
@@ -93,13 +129,29 @@ export const DashboardHome: React.FC<DashboardHomeProps> = ({ onViewChange }) =>
           <div className="bg-white rounded-2xl border border-slate-100 overflow-hidden shadow-sm">
             <table className="w-full text-left">
               <tbody className="divide-y divide-slate-50">
-                {recentActivities.map((act) => (
+                {allActivities.map((act) => (
                   <tr key={act.id} className="hover:bg-slate-50/50 transition-colors">
-                    <td className="px-6 py-4 font-bold text-slate-700">{act.title}</td>
+                    <td className="px-6 py-4">
+                      <div className="flex flex-col">
+                        <span className="font-bold text-slate-700">{act.title}</span>
+                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{act.type} • {act.date.toLocaleDateString('en-GB')}</span>
+                      </div>
+                    </td>
                     <td className="px-6 py-4 font-black text-slate-900 text-right">{act.amount}</td>
-                    <td className="px-6 py-4 text-xs font-bold text-slate-500 uppercase">{act.status}</td>
+                    <td className="px-6 py-4 text-right">
+                      <span className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest ${
+                        act.status === 'Approved' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'
+                      }`}>
+                        {act.status}
+                      </span>
+                    </td>
                   </tr>
                 ))}
+                {allActivities.length === 0 && (
+                  <tr>
+                    <td colSpan={3} className="px-6 py-10 text-center text-slate-400 font-bold uppercase text-xs">No recent activities found</td>
+                  </tr>
+                )}
               </tbody>
             </table>
           </div>
