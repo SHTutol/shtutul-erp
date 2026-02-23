@@ -111,12 +111,12 @@ export const NewNameEntry: React.FC<NewNameEntryProps> = ({ onViewChange, payees
   };
 
   const filtered = payees.filter(n => 
-    n.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-    n.phone.toLowerCase().includes(searchTerm.toLowerCase())
+    (n.name || '').toLowerCase().includes((searchTerm || '').toLowerCase()) || 
+    (n.phone || '').toLowerCase().includes((searchTerm || '').toLowerCase())
   );
 
   return (
-    <div className="w-full max-w-[1200px] flex flex-col bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden relative">
+    <div className="w-full flex flex-col bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden relative h-full">
       
       {/* ERP Toolbar Style */}
       <div className="no-print bg-[#F3F3F3] border-b border-gray-300 p-1 flex items-center flex-wrap gap-x-1">

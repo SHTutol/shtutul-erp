@@ -93,10 +93,10 @@ export const UnitEntry: React.FC<UnitEntryProps> = ({ onViewChange, units, onUpd
     alert("Unit information saved successfully!");
   };
 
-  const filtered = units.filter(u => u.name.toLowerCase().includes(searchTerm.toLowerCase()));
+  const filtered = units.filter(u => (u.name || '').toLowerCase().includes((searchTerm || '').toLowerCase()));
 
   return (
-    <div className="w-full flex flex-col bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden relative animate-in fade-in duration-500">
+    <div className="w-full flex flex-col bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden relative animate-in fade-in duration-500 h-full">
       
       {/* Modern Standard Toolbar */}
       <div className="no-print bg-slate-50 border-b border-slate-200 p-4 flex items-center justify-between flex-wrap gap-4">
