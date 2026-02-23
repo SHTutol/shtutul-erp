@@ -127,7 +127,7 @@ export const RequisitionReport: React.FC<RequisitionReportProps> = ({ onViewChan
   };
 
   return (
-    <div className="w-full max-w-[1400px] flex flex-col items-center animate-in fade-in duration-700 pb-20 relative">
+    <div className="overflow-auto max-h-[70vh] flex flex-col items-center animate-in fade-in duration-700 pb-20 relative">
       
       {/* ACTION BUTTONS AT TOP */}
       <div className="no-print w-full flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
