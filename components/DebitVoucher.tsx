@@ -42,7 +42,7 @@ export const DebitVoucher: React.FC<DebitVoucherProps> = ({
 }) => {
   const [data, setData] = useState<DebitVoucherData>({
     id: Math.random().toString(36).substr(2, 9),
-    no: nextDVNo || '',
+    no: editingData?.no || nextDVNo || '',
     date: new Date().toISOString().split('T')[0],
     paidTo: '',
     sisterConcern: '',
@@ -135,9 +135,9 @@ export const DebitVoucher: React.FC<DebitVoucherProps> = ({
         <div className="bg-white p-0 shadow-2xl overflow-hidden rounded-xl mb-20 print:shadow-none print:m-0">
           <div className="debit-voucher-paper font-serif text-black bg-white flex flex-col h-full relative border border-gray-100 print:border-none">
             <div className="text-center mb-2">
-              <h1 className="text-[24px] font-black leading-tight uppercase mb-0">{data.sisterConcern || 'AZLAN KNIT DYEING LTD.'}</h1>
+              <h1 className="text-[20px] font-black leading-tight uppercase mb-0">{data.sisterConcern || 'AZLAN KNIT DYEING LTD.'}</h1>
               <h2 className="text-[15px] font-bold uppercase mt-0 mb-0">{data.unit || 'KNIT DYEING UNIT'}</h2>
-              <p className="text-[9px] font-medium">House no. 315, Road No. 4, Baridhara DOHS, Dhaka-1206</p>
+              <p className="text-[12px] font-medium">House no. 315, Road No. 4, Baridhara DOHS, Dhaka-1206</p>
             </div>
 
             <div className="flex justify-between items-start px-1 mt-1 mb-1">

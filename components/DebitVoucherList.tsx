@@ -71,11 +71,14 @@ export const DebitVoucherList: React.FC<DebitVoucherListProps> = ({
     const targetId = id || selectedId;
     if (targetId) {
       setIsSaving(true);
-      onUpdateStatus(targetId, 'Approved');
-      if (searchTerm.trim() === '' && targetId === selectedId) {
-        setSelectedId(null);
+      try {
+        await onUpdateStatus(targetId, 'Approved');
+        if (searchTerm.trim() === '' && targetId === selectedId) {
+          setSelectedId(null);
+        }
+      } finally {
+        setIsSaving(false);
       }
-      setIsSaving(false);
     } else {
       alert("Please select a record first.");
     }

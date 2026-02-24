@@ -238,7 +238,11 @@ service cloud.firestore {
       case 'REQUISITION': return <RequisitionForm onViewChange={setCurrentView} onSave={(data) => { saveToCloud('requisitions', data); setCurrentView('REQ_LIST'); }} editingData={editingRequisition} nextReqNo={`REQ-00${requisitions.length + 1}`} availableUnits={units} availablePayees={payees} availableSisters={sisters} />;
       case 'VIEW_REQUISITION': return <RequisitionForm onViewChange={setCurrentView} onPrint={() => setCurrentView('REQ_LIST')} editingData={viewingRequisition} readOnly={true} availableUnits={units} availablePayees={payees} availableSisters={sisters} />;
       case 'DV_LIST': return <DebitVoucherList vouchers={debitVouchers} onDelete={(id) => deleteFromCloud('vouchers', id)} onAdd={() => { setEditingDV(null); setCurrentView('DEBIT_VOUCHER'); }} onEdit={(dv) => { setEditingDV(dv); setCurrentView('DEBIT_VOUCHER'); }} onView={(dv) => { setViewingDV(dv); setCurrentView('VIEW_DV'); }} onPreview={(dv) => { setViewingDV(dv); setCurrentView('VIEW_DV'); setTimeout(() => { window.print(); }, 800); }} onViewChange={setCurrentView} onUpdateStatus={(id, status) => onUpdateStatus('vouchers', id, status)} />;
-      case 'DEBIT_VOUCHER': return <DebitVoucher onViewChange={setCurrentView} onSave={(newData) => { saveToCloud('vouchers', newData); setCurrentView('DV_LIST'); }} editingData={editingDV} nextDVNo={`DV-00${debitVouchers.length + 1}/25`} availableUnits={units} availablePayees={payees} availableSisters={sisters} />;
+      case 'DEBIT_VOUCHER': 
+        const currentYear = new Date().getFullYear().toString().slice(-2);
+        const nextDVNumber = (debitVouchers.filter(dv => dv.no.endsWith(`/${currentYear}`)).length + 1).toString().padStart(4, '0');
+        const nextDVNo = `DV-${nextDVNumber}/${currentYear}`;
+        return <DebitVoucher onViewChange={setCurrentView} onSave={(newData) => { saveToCloud('vouchers', newData); setCurrentView('DV_LIST'); }} editingData={editingDV} nextDVNo={nextDVNo} availableUnits={units} availablePayees={payees} availableSisters={sisters} />;
       case 'VIEW_DV': return <DebitVoucher onViewChange={setCurrentView} onPrint={() => setCurrentView('DV_LIST')} editingData={viewingDV} readOnly={true} availableUnits={units} availablePayees={payees} availableSisters={sisters} />;
       case 'REQ_REPORT': return <RequisitionReport requisitions={requisitions} onViewChange={setCurrentView} />;
       case 'DV_REPORT': return <DebitVoucherReport vouchers={debitVouchers} onViewChange={setCurrentView} />;
