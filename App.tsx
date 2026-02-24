@@ -208,7 +208,7 @@ service cloud.firestore {
     }
   };
 
-  const onUpdateStatus = (collName: 'requisitions' | 'vouchers', id: string, status: 'Pending' | 'Approved') => {
+  const onUpdateStatus = (collName: 'requisitions' | 'vouchers', id: string, status: 'Pending' | 'Approved' | 'Processed') => {
     const collectionRef = collName === 'requisitions' ? requisitions : debitVouchers;
     const item = collectionRef.find(i => i.id === id);
     if (item) saveToCloud(collName, {...item, status});

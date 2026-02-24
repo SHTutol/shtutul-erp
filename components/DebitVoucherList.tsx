@@ -24,7 +24,7 @@ import {
 interface DebitVoucherListProps {
   vouchers: DebitVoucherData[];
   onDelete: (id: string) => void;
-  onUpdateStatus: (id: string, status: 'Pending' | 'Approved') => void;
+  onUpdateStatus: (id: string, status: 'Pending' | 'Approved' | 'Processed') => void;
   onAdd: () => void;
   onEdit: (dv: DebitVoucherData) => void;
   onView: (dv: DebitVoucherData) => void;
@@ -124,24 +124,24 @@ export const DebitVoucherList: React.FC<DebitVoucherListProps> = ({
                           (v.paidTo || '').toLowerCase().includes(term) ||
                           (v.for || '').toLowerCase().includes(term);
     
-    // If searching, show all matching records (Global Search)
-    if (term !== '') {
-      return matchesSearch;
+    const isSearching = term !== '' || appliedAdvSearch.ref !== '' || appliedAdvSearch.payee !== '' || appliedAdvSearch.startDate !== '';
+
+    if (!isSearching) {
+      return (v.status === 'Pending' || v.status === 'Approved' || !v.status) && matchesAdv;
     }
 
-    // If advanced search is active, show all matching regardless of status
-    if (appliedAdvSearch.ref || appliedAdvSearch.startDate || appliedAdvSearch.payee) {
-      return true;
-    }
-
-    // Otherwise, show only pending items (Default worklist)
-    return (v.status === 'Pending' || !v.status);
+    return matchesSearch && matchesAdv;
   });
 
   const totalAmount = filtered.reduce((sum, v) => sum + (v.amountTk || 0), 0);
 
   // Check if preview is allowed
   const isPreviewDisabled = !selectedDV || selectedDV.status !== 'Approved';
+
+  const handlePreview = (dv: DebitVoucherData) => {
+    onPreview(dv);
+    onUpdateStatus(dv.id, 'Processed');
+  };
 
   return (
     <div className="w-full flex-grow flex flex-col bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden animate-in fade-in duration-500 h-full">
@@ -214,7 +214,7 @@ export const DebitVoucherList: React.FC<DebitVoucherListProps> = ({
         </button>
 
         <button 
-          onClick={() => selectedDV && onPreview(selectedDV)}
+          onClick={() => selectedDV && handlePreview(selectedDV)}
           disabled={isPreviewDisabled}
           className={`flex items-center gap-1.5 px-3 py-1.5 font-semibold text-[13px] border-r border-gray-300 transition-colors ${!isPreviewDisabled ? 'hover:bg-gray-200 text-[#003366]' : 'text-gray-400 opacity-50 cursor-not-allowed'}`}
           title={isPreviewDisabled ? "Only approved vouchers can be previewed" : "Preview and Print"}
@@ -363,7 +363,8 @@ export const DebitVoucherList: React.FC<DebitVoucherListProps> = ({
                 <td className="px-6 py-4 text-right font-black text-base tabular-nums">৳ {dv.amountTk.toLocaleString()}</td>
                 <td className="px-6 py-4 text-center">
                   <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase ${
-                    dv.status === 'Approved' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'
+                    dv.status === 'Approved' ? 'bg-green-100 text-green-700' : 
+                    dv.status === 'Processed' ? 'bg-blue-100 text-blue-700' : 'bg-amber-100 text-amber-700'
                   }`}>
                     {dv.status || 'Pending'}
                   </span>

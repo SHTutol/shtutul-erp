@@ -47,7 +47,7 @@ body {
     width: 8.2in !important;
     height: 5.8in !important;
     margin: 0 !important; 
-    padding: 0.05in 0.2in 0.2in 0.2in !important; 
+    padding: 0.02in 0.2in 0.2in 0.2in !important; 
     box-shadow: none !important;
     border: none !important;
     page-break-after: always;
@@ -62,7 +62,7 @@ body {
 
   @page portrait-page {
     size: A4 portrait;
-    margin: 0.2in !important;
+    margin: 0.1in !important;
   }
 
   .debit-voucher-paper {

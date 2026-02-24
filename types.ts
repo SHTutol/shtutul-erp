@@ -7,10 +7,9 @@ export interface User {
   role: string;
   avatar?: string;
   lastLogin?: string;
+  lastSeen?: number; // Timestamp of last activity
   permissions: string[]; // List of view IDs the user can access
-  lastSeen?: any;
 }
-   
 
 export interface RequisitionData {
   id: string;
@@ -24,7 +23,7 @@ export interface RequisitionData {
   typeOfRequisition: string;
   amountTk: number;
   indentedBy: string;
-  status?: 'Pending' | 'Approved';
+  status?: 'Pending' | 'Approved' | 'Processed';
 }
 
 export interface UnitRecord {
@@ -59,21 +58,21 @@ export interface VoucherRow {
 
 export interface DebitVoucherData {
   id: string;
-  no: string; 
+  no: string; // DV-0001/25 format
   date: string;
   paidTo: string;
   sisterConcern: string;
   unit: string;
   paymentType: string;
-  paymentNo: string;      // এটি যোগ করুন (চেক নম্বর বা পেমেন্ট রেফারেন্সের জন্য)
-  chequeDate: string;     // এটি যোগ করুন
-  bankName: string;       // এটি যোগ করুন
+  paymentNo: string;
+  chequeDate: string;
+  bankName: string;
   paymentDate: string;
   bankAccountNo: string;
   for: string;
   enclosedNoPapers: string;
   accountHead: string;
   amountTk: number;
-  status?: 'Pending' | 'Approved';
+  status?: 'Pending' | 'Approved' | 'Processed';
   rows: VoucherRow[];
 }

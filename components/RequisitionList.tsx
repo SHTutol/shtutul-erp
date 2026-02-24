@@ -21,7 +21,7 @@ import {
 interface RequisitionListProps {
   requisitions: RequisitionData[];
   onDelete: (id: string) => void;
-  onUpdateStatus: (id: string, status: 'Pending' | 'Approved') => void;
+  onUpdateStatus: (id: string, status: 'Pending' | 'Approved' | 'Processed') => void;
   onAdd: () => void;
   onEdit: (req: RequisitionData) => void;
   onView: (req: RequisitionData) => void;
@@ -126,22 +126,24 @@ export const RequisitionList: React.FC<RequisitionListProps> = ({
       (r.nameOfPayee || '').toLowerCase().includes(term) ||
       (r.purpose || '').toLowerCase().includes(term);
 
-    if (term !== '') {
-      return matchesSearch;
-    }
-    
-    // If advanced search is active, show all matching regardless of status
-    if (appliedAdvSearch.ref || appliedAdvSearch.startDate || appliedAdvSearch.payee) {
-      return true;
+    const isSearching = term !== '' || appliedAdvSearch.ref !== '' || appliedAdvSearch.payee !== '' || appliedAdvSearch.startDate !== '';
+
+    if (!isSearching) {
+      return (r.status === 'Pending' || r.status === 'Approved' || !r.status) && matchesAdv;
     }
 
-    return (r.status === 'Pending' || !r.status);
+    return matchesSearch && matchesAdv;
   });
 
   const totalAmount = filtered.reduce((sum, req) => sum + (req.amountTk || 0), 0);
 
   // Check if preview is allowed
   const isPreviewDisabled = !selectedReq || selectedReq.status !== 'Approved';
+
+  const handlePreview = (req: RequisitionData) => {
+    onPreview(req);
+    onUpdateStatus(req.id, 'Processed');
+  };
 
   return (
     <div className="w-full flex flex-col bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden animate-in fade-in duration-500 h-full">
@@ -211,7 +213,7 @@ export const RequisitionList: React.FC<RequisitionListProps> = ({
         </button>
 
         <button 
-          onClick={() => selectedReq && onPreview(selectedReq)}
+          onClick={() => selectedReq && handlePreview(selectedReq)}
           disabled={isPreviewDisabled}
           className={`flex items-center gap-1.5 px-2 py-1.5 font-medium text-[13px] border-r border-gray-300 transition-colors ${!isPreviewDisabled ? 'hover:bg-gray-200 text-[#003366]' : 'text-gray-400 opacity-50 cursor-not-allowed'}`}
           title={isPreviewDisabled ? "Only approved requisitions can be previewed" : "Preview and Print"}
@@ -378,9 +380,10 @@ export const RequisitionList: React.FC<RequisitionListProps> = ({
                 <td className="px-6 py-4 text-center">
                   <div className="flex justify-center">
                     <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider ${
-                      req.status === 'Approved' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'
+                      req.status === 'Approved' ? 'bg-green-100 text-green-700' : 
+                      req.status === 'Processed' ? 'bg-blue-100 text-blue-700' : 'bg-amber-100 text-amber-700'
                     }`}>
-                      <div className={`w-1.5 h-1.5 rounded-full ${req.status === 'Approved' ? 'bg-green-500' : 'bg-amber-500'}`}></div>
+                      <div className={`w-1.5 h-1.5 rounded-full ${req.status === 'Approved' ? 'bg-green-500' : req.status === 'Processed' ? 'bg-blue-500' : 'bg-amber-500'}`}></div>
                       {req.status || 'Pending'}
                     </span>
                   </div>
