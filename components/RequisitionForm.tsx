@@ -298,7 +298,7 @@ export const RequisitionForm: React.FC<RequisitionFormProps> = ({
             <div className="requisition-paper bg-white text-black font-serif">
               
               <div className="text-center mb-1">
-                <h1 className="text-[34px] font-bold uppercase leading-tight mb-0 tracking-tight">{data.sisterConcern || 'SHTutol ERP SYSTEM'}</h1>
+                <h1 className="text-[28px] font-bold uppercase leading-tight mb-0 tracking-tight">{data.sisterConcern || 'SHTutol ERP SYSTEM'}</h1>
                 <h2 className="text-[20px] font-bold uppercase tracking-[0.1em] mt-0 mb-1">{data.unit || 'UNIT-2'}</h2>
                 <div className="inline-block border-b border-black pb-0.5"><h3 className="text-[16px] font-bold uppercase tracking-[0.2em]">REQUISITION FORM</h3></div>
               </div>
