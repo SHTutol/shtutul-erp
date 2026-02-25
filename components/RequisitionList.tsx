@@ -375,6 +375,7 @@ export const RequisitionList: React.FC<RequisitionListProps> = ({
               <th className="px-6 py-4">Payee Name</th>
               <th className="px-6 py-4 text-right">Amount (Tk)</th>
               <th className="px-6 py-4 text-center">Status</th>
+              <th className="px-6 py-4 text-center">Approve By</th>
               <th className="px-6 py-4 text-center w-40 no-print">Actions</th>
             </tr>
           </thead>
@@ -411,6 +412,11 @@ export const RequisitionList: React.FC<RequisitionListProps> = ({
                       {req.status || 'Pending'}
                     </span>
                   </div>
+                </td>
+                <td className="px-6 py-4 text-center">
+                  <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">
+                    {req.approvedBy || '-'}
+                  </span>
                 </td>
                 <td className="px-6 py-4 no-print">
                   <div className="flex items-center justify-center gap-1">
@@ -458,7 +464,7 @@ export const RequisitionList: React.FC<RequisitionListProps> = ({
               </tr>
             )) : (
               <tr>
-                <td colSpan={7} className="px-6 py-24 text-center">
+                <td colSpan={8} className="px-6 py-24 text-center">
                   <div className="flex flex-col items-center gap-4">
                     <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center text-slate-200">
                       <List size={32} />

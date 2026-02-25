@@ -24,6 +24,7 @@ export interface RequisitionData {
   amountTk: number;
   indentedBy: string;
   status?: 'Pending' | 'Approved' | 'Processed';
+  approvedBy?: string;
 }
 
 export interface UnitRecord {
@@ -74,6 +75,7 @@ export interface DebitVoucherData {
   accountHead: string;
   amountTk: number;
   status?: 'Pending' | 'Approved' | 'Processed';
+  approvedBy?: string;
   rows: VoucherRow[];
 }
 

@@ -304,7 +304,12 @@ service cloud.firestore {
     const item = collectionRef.find(i => i.id === id);
     if (item) {
       try {
-        await saveToCloud(collName, { ...item, status }, 'Update');
+        const updatedItem = { 
+          ...item, 
+          status,
+          approvedBy: status === 'Approved' ? (user?.name || 'Unknown') : (status === 'Pending' ? '' : item.approvedBy)
+        };
+        await saveToCloud(collName, updatedItem, 'Update');
         
         // Audit Log for status change
         const log: AuditLog = {
@@ -314,7 +319,7 @@ service cloud.firestore {
           module: collName === 'requisitions' ? 'Requisition' : 'Debit Voucher',
           operation: status === 'Approved' ? 'Approve' : status === 'Processed' ? 'Process' : 'Update',
           referenceNo: (item as RequisitionData).requisitionNo || (item as DebitVoucherData).no,
-          data: { ...item, status }
+          data: updatedItem
         };
         await setDoc(doc(db, 'audit_log', log.id), log);
 
@@ -343,18 +348,130 @@ service cloud.firestore {
     : (user?.permissions || []);
   const filteredMenuItems = menuItems.filter(item => userPermissions.includes(item.id));
 
+  const handleStandardizeReqNumbers = async () => {
+    if (!window.confirm("আপনি কি নিশ্চিত যে আপনি সব রিকুইজিশন নাম্বার স্ট্যান্ডার্ডাইজ এবং ডুপ্লিকেট ফিক্স করতে চান? এটি সব রেকর্ড চেক করে ইউনিক নাম্বার এসাইন করবে।")) return;
+
+    setSaveStatus({ type: 'loading', msg: 'নাম্বারগুলো প্রসেস হচ্ছে...' });
+    try {
+      // Sort by date and original number to keep a logical sequence
+      const sortedReqs = [...requisitions].sort((a, b) => {
+        const dateCompare = a.date.localeCompare(b.date);
+        if (dateCompare !== 0) return dateCompare;
+        return a.requisitionNo.localeCompare(b.requisitionNo);
+      });
+
+      let updatedCount = 0;
+      const usedNumbers = new Set<string>();
+
+      for (const req of sortedReqs) {
+        const year = new Date(req.date).getFullYear().toString().slice(-2);
+        const match = req.requisitionNo.match(/REQ-(\d+)/i);
+        let num = match ? parseInt(match[1], 10) : 1;
+        
+        let newNo = `REQ-${num.toString().padStart(4, '0')}/${year}`;
+        
+        // If number is already used or not in standard format, find next available
+        while (usedNumbers.has(newNo)) {
+          num++;
+          newNo = `REQ-${num.toString().padStart(4, '0')}/${year}`;
+        }
+
+        usedNumbers.add(newNo);
+
+        if (req.requisitionNo !== newNo) {
+          await setDoc(doc(db, 'requisitions', req.id), { ...req, requisitionNo: newNo });
+          updatedCount++;
+        }
+      }
+      
+      setSaveStatus({ type: 'success', msg: `${updatedCount} টি রিকুইজিশন আপডেট করা হয়েছে এবং ডুপ্লিকেট ফিক্স করা হয়েছে!` });
+      setTimeout(() => setSaveStatus(null), 3000);
+    } catch (error) {
+      console.error("Migration failed:", error);
+      setSaveStatus(null);
+      alert("নাম্বার আপডেট করতে সমস্যা হয়েছে।");
+    }
+  };
+
   const renderContent = () => {
+    const currentYear = new Date().getFullYear().toString().slice(-2);
+
+    // Robust Requisition Number Generation
+    const getNextReqNo = () => {
+      const yearSuffix = `/${currentYear}`;
+      const thisYearReqs = requisitions.filter(r => r.requisitionNo.endsWith(yearSuffix));
+      if (thisYearReqs.length === 0) return `REQ-0001${yearSuffix}`;
+      
+      const numbers = thisYearReqs.map(r => {
+        const match = r.requisitionNo.match(/REQ-(\d+)/i);
+        return match ? parseInt(match[1], 10) : 0;
+      });
+      const max = Math.max(...numbers);
+      return `REQ-${(max + 1).toString().padStart(4, '0')}${yearSuffix}`;
+    };
+
+    // Robust Debit Voucher Number Generation
+    const getNextDVNo = () => {
+      const yearSuffix = `/${currentYear}`;
+      const thisYearVouchers = debitVouchers.filter(dv => dv.no.endsWith(yearSuffix));
+      if (thisYearVouchers.length === 0) return `DV-0001${yearSuffix}`;
+      
+      const numbers = thisYearVouchers.map(dv => {
+        const match = dv.no.match(/DV-(\d+)/);
+        return match ? parseInt(match[1], 10) : 0;
+      });
+      const max = Math.max(...numbers);
+      return `DV-${(max + 1).toString().padStart(4, '0')}${yearSuffix}`;
+    };
+
     switch (currentView) {
       case 'DASHBOARD': return <DashboardHome onViewChange={setCurrentView} activeUserCount={activeUsers.length} requisitions={requisitions} vouchers={debitVouchers} sisters={sisters} user={user} />;
       case 'REQ_LIST': return <RequisitionList requisitions={requisitions} onDelete={(id) => deleteFromCloud('requisitions', id)} onAdd={() => { setEditingRequisition(null); setCurrentView('REQUISITION'); }} onEdit={(req) => { setEditingRequisition(req); setCurrentView('REQUISITION'); }} onView={(req) => { setViewingRequisition(req); setCurrentView('VIEW_REQUISITION'); }} onPreview={(req) => { setViewingRequisition(req); setCurrentView('VIEW_REQUISITION'); setTimeout(() => { window.print(); }, 800); }} onViewChange={setCurrentView} onUpdateStatus={(id, status) => onUpdateStatus('requisitions', id, status)} />;
-      case 'REQUISITION': return <RequisitionForm onViewChange={setCurrentView} onSave={(data) => { saveToCloud('requisitions', data); setCurrentView('REQ_LIST'); }} editingData={editingRequisition} nextReqNo={`REQ-00${requisitions.length + 1}`} availableUnits={units} availablePayees={payees} availableSisters={sisters} />;
+      case 'REQUISITION': return <RequisitionForm onViewChange={setCurrentView} onSave={async (data) => { 
+        // Generate number at the moment of saving to prevent race condition duplicates
+        const currentYear = new Date().getFullYear().toString().slice(-2);
+        const yearSuffix = `/${currentYear}`;
+        const thisYearReqs = requisitions.filter(r => r.requisitionNo.endsWith(yearSuffix));
+        
+        let maxNum = 0;
+        thisYearReqs.forEach(r => {
+          const match = r.requisitionNo.match(/REQ-(\d+)/i);
+          if (match) {
+            const n = parseInt(match[1], 10);
+            if (n > maxNum) maxNum = n;
+          }
+        });
+        
+        const finalNo = `REQ-${(maxNum + 1).toString().padStart(4, '0')}${yearSuffix}`;
+        const finalData = { ...data, requisitionNo: finalNo };
+        
+        await saveToCloud('requisitions', finalData); 
+        setCurrentView('REQ_LIST'); 
+      }} editingData={editingRequisition} nextReqNo={getNextReqNo()} availableUnits={units} availablePayees={payees} availableSisters={sisters} />;
       case 'VIEW_REQUISITION': return <RequisitionForm onViewChange={setCurrentView} onPrint={() => setCurrentView('REQ_LIST')} editingData={viewingRequisition} readOnly={true} availableUnits={units} availablePayees={payees} availableSisters={sisters} />;
       case 'DV_LIST': return <DebitVoucherList vouchers={debitVouchers} onDelete={(id) => deleteFromCloud('vouchers', id)} onAdd={() => { setEditingDV(null); setCurrentView('DEBIT_VOUCHER'); }} onEdit={(dv) => { setEditingDV(dv); setCurrentView('DEBIT_VOUCHER'); }} onView={(dv) => { setViewingDV(dv); setCurrentView('VIEW_DV'); }} onPreview={(dv) => { setViewingDV(dv); setCurrentView('VIEW_DV'); setTimeout(() => { window.print(); }, 800); }} onViewChange={setCurrentView} onUpdateStatus={(id, status) => onUpdateStatus('vouchers', id, status)} />;
       case 'DEBIT_VOUCHER': 
-        const currentYear = new Date().getFullYear().toString().slice(-2);
-        const nextDVNumber = (debitVouchers.filter(dv => dv.no.endsWith(`/${currentYear}`)).length + 1).toString().padStart(4, '0');
-        const nextDVNo = `DV-${nextDVNumber}/${currentYear}`;
-        return <DebitVoucher onViewChange={setCurrentView} onSave={(newData) => { saveToCloud('vouchers', newData); setCurrentView('DV_LIST'); }} editingData={editingDV} nextDVNo={nextDVNo} availableUnits={units} availablePayees={payees} availableSisters={sisters} />;
+        return <DebitVoucher onViewChange={setCurrentView} onSave={async (newData) => { 
+          // Generate number at the moment of saving to prevent race condition duplicates
+          const currentYear = new Date().getFullYear().toString().slice(-2);
+          const yearSuffix = `/${currentYear}`;
+          const thisYearVouchers = debitVouchers.filter(dv => dv.no.endsWith(yearSuffix));
+          
+          let maxNum = 0;
+          thisYearVouchers.forEach(dv => {
+            const match = dv.no.match(/DV-(\d+)/i);
+            if (match) {
+              const n = parseInt(match[1], 10);
+              if (n > maxNum) maxNum = n;
+            }
+          });
+          
+          const finalNo = `DV-${(maxNum + 1).toString().padStart(4, '0')}${yearSuffix}`;
+          const finalData = { ...newData, no: finalNo };
+          
+          await saveToCloud('vouchers', finalData); 
+          setCurrentView('DV_LIST'); 
+        }} editingData={editingDV} nextDVNo={getNextDVNo()} availableUnits={units} availablePayees={payees} availableSisters={sisters} />;
       case 'VIEW_DV': return <DebitVoucher onViewChange={setCurrentView} onPrint={() => setCurrentView('DV_LIST')} editingData={viewingDV} readOnly={true} availableUnits={units} availablePayees={payees} availableSisters={sisters} />;
       case 'REQ_REPORT': return <RequisitionReport requisitions={requisitions} onViewChange={setCurrentView} />;
       case 'DV_REPORT': return <DebitVoucherReport vouchers={debitVouchers} onViewChange={setCurrentView} />;
@@ -377,7 +494,7 @@ service cloud.firestore {
         const existingIds = list.map(u => u.id);
         users.forEach(u => { if (!existingIds.includes(u.id)) deleteFromCloud('users', u.id); });
         list.forEach(u => saveToCloud('users', u));
-      }} onViewChange={setCurrentView} />;
+      }} onViewChange={setCurrentView} onStandardizeReqNumbers={handleStandardizeReqNumbers} />;
       case 'DB_ARCHIVE': return <DatabaseArchive logs={auditLogs} onRestore={handleRestoreLog} onDelete={handleDeleteLog} onView={handleViewLog} onPreview={handlePreviewLog} />;
       default: return <DashboardHome onViewChange={setCurrentView} activeUserCount={activeUsers.length} requisitions={requisitions} vouchers={debitVouchers} sisters={sisters} user={user} />;
     }

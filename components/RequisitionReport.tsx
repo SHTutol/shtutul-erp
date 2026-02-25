@@ -182,7 +182,7 @@ export const RequisitionReport: React.FC<RequisitionReportProps> = ({ onViewChan
             </label>
             <input 
               type="text"
-              placeholder="E.G. REQ-001"
+              placeholder="E.G. REQ-0001/25"
               value={refFilter}
               onChange={(e) => setRefFilter(e.target.value)}
               className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-700 outline-none uppercase"

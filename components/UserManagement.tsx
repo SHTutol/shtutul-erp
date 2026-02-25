@@ -28,6 +28,7 @@ interface UserManagementProps {
   onViewChange: (view: ViewType) => void;
   users: User[];
   onUpdateUsers: (users: User[]) => void;
+  onStandardizeReqNumbers?: () => void;
 }
 
 const PERMISSION_OPTIONS = [
@@ -42,7 +43,7 @@ const PERMISSION_OPTIONS = [
   { id: 'USER_MANAGEMENT', label: 'User Management' },
 ];
 
-export const UserManagement: React.FC<UserManagementProps> = ({ onViewChange, users, onUpdateUsers }) => {
+export const UserManagement: React.FC<UserManagementProps> = ({ onViewChange, users, onUpdateUsers, onStandardizeReqNumbers }) => {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -164,6 +165,12 @@ export const UserManagement: React.FC<UserManagementProps> = ({ onViewChange, us
           </div>
         </div>
         <div className="flex items-center gap-3">
+          <button 
+            onClick={onStandardizeReqNumbers}
+            className="flex items-center gap-2 px-6 py-3 bg-amber-600 text-white font-black text-[10px] uppercase rounded-xl hover:bg-amber-700 transition-all shadow-lg shadow-amber-500/20"
+          >
+            <RefreshCw size={14} /> Standardize Req Numbers
+          </button>
           <button 
             onClick={handleExportData}
             className="flex items-center gap-2 px-6 py-3 bg-white border-2 border-indigo-200 text-indigo-700 font-black text-[10px] uppercase rounded-xl hover:bg-indigo-50 transition-all"
