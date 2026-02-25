@@ -59,11 +59,20 @@ export const DebitVoucherList: React.FC<DebitVoucherListProps> = ({
 
   const handleDelete = (id?: string) => {
     const targetId = id || selectedId;
-    if (targetId && confirm('Are you sure you want to delete this debit voucher?')) {
+    if (!targetId) {
+      alert("Please select a record first.");
+      return;
+    }
+
+    const dvToDelete = vouchers.find(v => v.id === targetId);
+    if (dvToDelete && (dvToDelete.status === 'Approved' || dvToDelete.status === 'Processed')) {
+      alert("This item is already approved. Delete can't be possible.");
+      return;
+    }
+
+    if (confirm('Are you sure you want to delete this debit voucher?')) {
       onDelete(targetId);
       if (targetId === selectedId) setSelectedId(null);
-    } else if (!targetId) {
-      alert("Please select a record first.");
     }
   };
 
@@ -82,6 +91,18 @@ export const DebitVoucherList: React.FC<DebitVoucherListProps> = ({
     } else {
       alert("Please select a record first.");
     }
+  };
+
+  const handleEdit = () => {
+    if (!selectedDV) {
+      alert("Please select a record first.");
+      return;
+    }
+    if (selectedDV.status === 'Approved' || selectedDV.status === 'Processed') {
+      alert("This Item is already approved.");
+      return;
+    }
+    onEdit(selectedDV);
   };
 
   const handleUndoApprove = () => {
@@ -139,7 +160,7 @@ export const DebitVoucherList: React.FC<DebitVoucherListProps> = ({
   const totalAmount = filtered.reduce((sum, v) => sum + (v.amountTk || 0), 0);
 
   // Check if preview is allowed
-  const isPreviewDisabled = !selectedDV || selectedDV.status !== 'Approved';
+  const isPreviewDisabled = !selectedDV || (selectedDV.status !== 'Approved' && selectedDV.status !== 'Processed');
 
   const handlePreview = (dv: DebitVoucherData) => {
     onPreview(dv);
@@ -175,7 +196,7 @@ export const DebitVoucherList: React.FC<DebitVoucherListProps> = ({
         </button>
 
         <button 
-          onClick={() => selectedDV && onEdit(selectedDV)}
+          onClick={handleEdit}
           disabled={!selectedDV}
           className={`flex items-center gap-1.5 px-3 py-1.5 font-semibold text-[13px] border-r border-gray-300 transition-colors ${selectedDV ? 'hover:bg-gray-200 text-[#003366]' : 'text-gray-400 opacity-50 cursor-not-allowed'}`}
         >

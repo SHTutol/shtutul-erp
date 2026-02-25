@@ -56,12 +56,33 @@ export const RequisitionList: React.FC<RequisitionListProps> = ({
 
   const handleDelete = (id?: string) => {
     const targetId = id || selectedId;
-    if (targetId && confirm('Are you sure you want to delete this requisition?')) {
+    if (!targetId) {
+      alert("Please select a record first.");
+      return;
+    }
+
+    const reqToDelete = requisitions.find(r => r.id === targetId);
+    if (reqToDelete && (reqToDelete.status === 'Approved' || reqToDelete.status === 'Processed')) {
+      alert("This item is already approved. Delete can't be possible.");
+      return;
+    }
+
+    if (confirm('Are you sure you want to delete this requisition?')) {
       onDelete(targetId);
       if (targetId === selectedId) setSelectedId(null);
-    } else if (!targetId) {
-      alert("Please select a record first.");
     }
+  };
+
+  const handleEdit = () => {
+    if (!selectedReq) {
+      alert("Please select a record first.");
+      return;
+    }
+    if (selectedReq.status === 'Approved' || selectedReq.status === 'Processed') {
+      alert("This Item is already approved.");
+      return;
+    }
+    onEdit(selectedReq);
   };
 
   const handleApprove = async (id?: string) => {
@@ -141,7 +162,7 @@ export const RequisitionList: React.FC<RequisitionListProps> = ({
   const totalAmount = filtered.reduce((sum, req) => sum + (req.amountTk || 0), 0);
 
   // Check if preview is allowed
-  const isPreviewDisabled = !selectedReq || selectedReq.status !== 'Approved';
+  const isPreviewDisabled = !selectedReq || (selectedReq.status !== 'Approved' && selectedReq.status !== 'Processed');
 
   const handlePreview = (req: RequisitionData) => {
     onPreview(req);
@@ -174,7 +195,7 @@ export const RequisitionList: React.FC<RequisitionListProps> = ({
         </button>
 
         <button 
-          onClick={() => selectedReq && onEdit(selectedReq)}
+          onClick={handleEdit}
           disabled={!selectedReq}
           className={`flex items-center gap-1.5 px-2 py-1.5 font-medium text-[13px] border-r border-gray-300 transition-colors ${selectedReq ? 'hover:bg-gray-200 text-[#003366]' : 'text-gray-400 opacity-50 cursor-not-allowed'}`}
         >

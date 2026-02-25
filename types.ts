@@ -76,3 +76,13 @@ export interface DebitVoucherData {
   status?: 'Pending' | 'Approved' | 'Processed';
   rows: VoucherRow[];
 }
+
+export interface AuditLog {
+  id: string;
+  timestamp: number;
+  user: string;
+  module: 'Requisition' | 'Debit Voucher' | 'User' | 'Settings';
+  operation: 'Create' | 'Update' | 'Delete' | 'Approve' | 'Process' | 'Restore';
+  referenceNo: string;
+  data: any;
+}

@@ -10,9 +10,10 @@ import { UnitEntry } from './components/UnitEntry';
 import { DashboardHome } from './components/DashboardHome';
 import { RequisitionList } from './components/RequisitionList';
 import { DebitVoucherList } from './components/DebitVoucherList';
+import { DatabaseArchive } from './components/DatabaseArchive';
 import { Login } from './components/Login';
 import { UserManagement } from './components/UserManagement';
-import { RequisitionData, UnitRecord, DebitVoucherData, PayeeRecord, SisterRecord, User } from './types';
+import { RequisitionData, UnitRecord, DebitVoucherData, PayeeRecord, SisterRecord, User, AuditLog } from './types';
 import { db } from './firebase';
 import { 
   collection, 
@@ -56,7 +57,7 @@ import {
   Wifi
 } from 'lucide-react';
 
-export type ViewType = 'DASHBOARD' | 'REQ_LIST' | 'REQUISITION' | 'VIEW_REQUISITION' | 'DV_LIST' | 'DEBIT_VOUCHER' | 'VIEW_DV' | 'REQ_REPORT' | 'DV_REPORT' | 'NEW_NAME' | 'NEW_SISTER' | 'UNIT_ENTRY' | 'USER_MANAGEMENT';
+export type ViewType = 'DASHBOARD' | 'REQ_LIST' | 'REQUISITION' | 'VIEW_REQUISITION' | 'DV_LIST' | 'DEBIT_VOUCHER' | 'VIEW_DV' | 'REQ_REPORT' | 'DV_REPORT' | 'NEW_NAME' | 'NEW_SISTER' | 'UNIT_ENTRY' | 'USER_MANAGEMENT' | 'DB_ARCHIVE';
 
 export default function App() {
   const [users, setUsers] = useState<User[]>([]);
@@ -65,6 +66,7 @@ export default function App() {
   const [units, setUnits] = useState<UnitRecord[]>([]);
   const [payees, setPayees] = useState<PayeeRecord[]>([]);
   const [sisters, setSisters] = useState<SisterRecord[]>([]);
+  const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
   
   const [user, setUser] = useState<User | null>(() => {
     const saved = localStorage.getItem('shtutul_erp_user');
@@ -146,9 +148,10 @@ service cloud.firestore {
     const unsubUnits = setupListener('units', setUnits);
     const unsubPayees = setupListener('payees', setPayees);
     const unsubSisters = setupListener('sisters', setSisters);
+    const unsubAuditLogs = setupListener('audit_log', setAuditLogs, query(collection(db, 'audit_log'), orderBy('timestamp', 'desc')));
 
     return () => {
-      unsubUsers(); unsubReqs(); unsubDVs(); unsubUnits(); unsubPayees(); unsubSisters();
+      unsubUsers(); unsubReqs(); unsubDVs(); unsubUnits(); unsubPayees(); unsubSisters(); unsubAuditLogs();
     };
   }, []);
 
@@ -160,14 +163,28 @@ service cloud.firestore {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const saveToCloud = async (collName: string, data: any) => {
+  const saveToCloud = async (collName: string, data: any, operation: 'Create' | 'Update' = 'Update') => {
     setSaveStatus({ type: 'loading', msg: 'Cloud-এ সেভ হচ্ছে...' });
     try {
       await setDoc(doc(db, collName, data.id), data);
+      
+      // Audit Log
+      const log: AuditLog = {
+        id: `${Date.now()}`,
+        timestamp: Date.now(),
+        user: user?.name || 'Unknown',
+        module: collName === 'requisitions' ? 'Requisition' : collName === 'vouchers' ? 'Debit Voucher' : 'Settings',
+        operation: operation,
+        referenceNo: data.requisitionNo || data.no || data.name || data.id,
+        data: data
+      };
+      await setDoc(doc(db, 'audit_log', log.id), log);
+
       setIsOnline(true);
       setPermissionError(false);
       setSaveStatus({ type: 'success', msg: 'Cloud-এ সফলভাবে সেভ হয়েছে!' });
       setTimeout(() => setSaveStatus(null), 3000);
+      return Promise.resolve(); // Indicate success
     } catch (e: any) {
       console.error("Save failed:", e);
       setIsOnline(false);
@@ -177,13 +194,32 @@ service cloud.firestore {
       } else {
         alert("ডাটা সেভ করতে সমস্যা হয়েছে। ইন্টারনেট চেক করুন।");
       }
+      return Promise.reject(e); // Indicate failure
     }
   };
 
   const deleteFromCloud = async (collName: string, id: string) => {
     setSaveStatus({ type: 'loading', msg: 'মুছে ফেলা হচ্ছে...' });
     try {
+      const collectionRef = collName === 'requisitions' ? requisitions : collName === 'vouchers' ? debitVouchers : [];
+      const itemToDelete = collectionRef.find(item => item.id === id);
+
       await deleteDoc(doc(db, collName, id));
+
+      // Audit Log
+      if (itemToDelete) {
+        const log: AuditLog = {
+          id: `${Date.now()}`,
+          timestamp: Date.now(),
+          user: user?.name || 'Unknown',
+          module: collName === 'requisitions' ? 'Requisition' : 'Debit Voucher',
+          operation: 'Delete',
+          referenceNo: (itemToDelete as RequisitionData).requisitionNo || (itemToDelete as DebitVoucherData).no,
+          data: itemToDelete
+        };
+        await setDoc(doc(db, 'audit_log', log.id), log);
+      }
+
       setIsOnline(true);
       setSaveStatus({ type: 'success', msg: 'সফলভাবে মুছে ফেলা হয়েছে!' });
       setTimeout(() => setSaveStatus(null), 2000);
@@ -208,10 +244,30 @@ service cloud.firestore {
     }
   };
 
-  const onUpdateStatus = (collName: 'requisitions' | 'vouchers', id: string, status: 'Pending' | 'Approved' | 'Processed') => {
+  const onUpdateStatus = async (collName: 'requisitions' | 'vouchers', id: string, status: 'Pending' | 'Approved' | 'Processed') => {
     const collectionRef = collName === 'requisitions' ? requisitions : debitVouchers;
     const item = collectionRef.find(i => i.id === id);
-    if (item) saveToCloud(collName, {...item, status});
+    if (item) {
+      try {
+        await saveToCloud(collName, { ...item, status }, 'Update');
+        
+        // Audit Log for status change
+        const log: AuditLog = {
+          id: `${Date.now()}`,
+          timestamp: Date.now(),
+          user: user?.name || 'Unknown',
+          module: collName === 'requisitions' ? 'Requisition' : 'Debit Voucher',
+          operation: status === 'Approved' ? 'Approve' : status === 'Processed' ? 'Process' : 'Update',
+          referenceNo: (item as RequisitionData).requisitionNo || (item as DebitVoucherData).no,
+          data: { ...item, status }
+        };
+        await setDoc(doc(db, 'audit_log', log.id), log);
+
+      } catch (error) {
+        // Handle failed save if necessary
+        console.error("Status update failed:", error);
+      }
+    }
   };
 
   const menuItems = [
@@ -224,10 +280,11 @@ service cloud.firestore {
     { id: 'NEW_SISTER', label: 'Sister Concerns', icon: <Building2 size={20} /> },
     { id: 'UNIT_ENTRY', label: 'Unit Entry', icon: <Layers size={20} /> },
     { id: 'USER_MANAGEMENT', label: 'User Management', icon: <Users size={20} /> },
+    { id: 'DB_ARCHIVE', label: 'Database Archive', icon: <ServerCrash size={20} /> },
   ];
 
   const userPermissions = (user?.username === 'admin' || user?.role === 'System Admin') 
-    ? ['DASHBOARD', 'REQ_LIST', 'DV_LIST', 'REQ_REPORT', 'DV_REPORT', 'NEW_NAME', 'NEW_SISTER', 'UNIT_ENTRY', 'USER_MANAGEMENT']
+    ? ['DASHBOARD', 'REQ_LIST', 'DV_LIST', 'REQ_REPORT', 'DV_REPORT', 'NEW_NAME', 'NEW_SISTER', 'UNIT_ENTRY', 'USER_MANAGEMENT', 'DB_ARCHIVE']
     : (user?.permissions || []);
   const filteredMenuItems = menuItems.filter(item => userPermissions.includes(item.id));
 
@@ -266,6 +323,7 @@ service cloud.firestore {
         users.forEach(u => { if (!existingIds.includes(u.id)) deleteFromCloud('users', u.id); });
         list.forEach(u => saveToCloud('users', u));
       }} onViewChange={setCurrentView} />;
+      case 'DB_ARCHIVE': return <DatabaseArchive logs={auditLogs} onRestore={() => {}} onDelete={() => {}} onView={() => {}} onPreview={() => {}} />;
       default: return <DashboardHome onViewChange={setCurrentView} activeUserCount={activeUsers.length} requisitions={requisitions} vouchers={debitVouchers} sisters={sisters} user={user} />;
     }
   };
