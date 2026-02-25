@@ -298,7 +298,7 @@ export const RequisitionForm: React.FC<RequisitionFormProps> = ({
             <div className="requisition-paper bg-white text-black font-serif">
               
               <div className="text-center mb-1">
-                <h1 className="text-[28px] font-bold uppercase leading-tight mb-0 tracking-tight">{data.sisterConcern || 'SHTutol ERP SYSTEM'}</h1>
+                <h1 className="text-[34px] font-bold uppercase leading-tight mb-0 tracking-tight">{data.sisterConcern || 'SHTutol ERP SYSTEM'}</h1>
                 <h2 className="text-[20px] font-bold uppercase tracking-[0.1em] mt-0 mb-1">{data.unit || 'UNIT-2'}</h2>
                 <div className="inline-block border-b border-black pb-0.5"><h3 className="text-[16px] font-bold uppercase tracking-[0.2em]">REQUISITION FORM</h3></div>
               </div>
@@ -319,14 +319,14 @@ export const RequisitionForm: React.FC<RequisitionFormProps> = ({
               <div className="space-y-2 px-1">
                 <div className="flex items-end gap-2 h-6">
                   <span className="whitespace-nowrap font-bold uppercase text-[12px]">NAME OF PAYEE:,</span>
-                  <div className="flex-grow border-b border-black font-bold text-[16px] uppercase px-2 italic tracking-tight">
+                  <div className="flex-grow border-b border-black font-bold text-[12px] normal-case px-2 italic tracking-tight">
                     {data.nameOfPayee}
                   </div>
                 </div>
 
                 <div className="flex items-end gap-2 h-6">
                   <span className="whitespace-nowrap font-bold uppercase text-[12px]">THROUGH:</span>
-                  <div className="flex-grow border-b border-black font-bold text-[16px] uppercase px-2 italic">
+                  <div className="flex-grow border-b border-black font-bold text-[12px] normal-case px-2 italic">
                     {data.through}
                   </div>
                 </div>
@@ -334,7 +334,7 @@ export const RequisitionForm: React.FC<RequisitionFormProps> = ({
                 <div className="flex flex-col gap-0.5">
                   <div className="flex items-end gap-2 h-6">
                     <span className="whitespace-nowrap font-bold uppercase text-[12px]">PURPOSE:</span>
-                    <div className="flex-grow border-b border-black font-bold text-[16px] uppercase px-1 italic h-full flex items-end">
+                    <div className="flex-grow border-b border-black font-bold text-[12px] normal-case px-1 italic h-full flex items-end">
                       {data.purpose}
                     </div>
                   </div>
@@ -344,13 +344,13 @@ export const RequisitionForm: React.FC<RequisitionFormProps> = ({
                 <div className="flex items-end justify-between gap-2 pt-1">
                   <div className="flex items-end gap-3 flex-grow h-8">
                     <span className="whitespace-nowrap font-bold uppercase text-[12px]">TYPE OF REQUISITION:.</span>
-                    <div className="flex-grow border-b border-black font-bold text-[16px] uppercase px-2 italic">
+                    <div className="flex-grow border-b border-black font-bold text-[12px] normal-case px-2 italic">
                       {data.typeOfRequisition}
                     </div>
                   </div>
                   <div className="flex items-end gap-3 h-8">
                     <span className="whitespace-nowrap font-bold uppercase text-[12px]">AMOUNT TK:</span>
-                    <div className="w-32 border-b border-black font-bold text-[22px] text-right px-2 italic">
+                    <div className="w-32 border-b border-black font-bold text-[12px] text-right px-2 italic">
                       {data.amountTk.toLocaleString()}/-
                     </div>
                   </div>
@@ -358,7 +358,7 @@ export const RequisitionForm: React.FC<RequisitionFormProps> = ({
 
                 <div className="flex items-end gap-3 pt-2 h-8">
                   <span className="whitespace-nowrap font-bold uppercase text-[12px]">AMOUNT IN WORDS.</span>
-                  <div className="flex-grow border-b border-black font-bold uppercase text-[16px] px-2 italic leading-tight">
+                  <div className="flex-grow border-b border-black font-bold normal-case text-[12px] px-2 italic leading-tight">
                     {numberToWords(data.amountTk)}
                   </div>
                 </div>
