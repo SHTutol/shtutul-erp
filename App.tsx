@@ -86,6 +86,7 @@ export default function App() {
   const [viewingRequisition, setViewingRequisition] = useState<RequisitionData | null>(null);
   const [editingDV, setEditingDV] = useState<DebitVoucherData | null>(null);
   const [viewingDV, setViewingDV] = useState<DebitVoucherData | null>(null);
+  const [viewingLog, setViewingLog] = useState<AuditLog | null>(null);
 
   const ruleCode = `rules_version = '2';
 service cloud.firestore {
@@ -163,7 +164,7 @@ service cloud.firestore {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const saveToCloud = async (collName: string, data: any, operation: 'Create' | 'Update' = 'Update') => {
+  const saveToCloud = async (collName: string, data: any, operation: 'Create' | 'Update' | 'Delete' | 'Restore' | 'Approve' | 'Process' = 'Update') => {
     setSaveStatus({ type: 'loading', msg: 'Cloud-এ সেভ হচ্ছে...' });
     try {
       await setDoc(doc(db, collName, data.id), data);
@@ -244,6 +245,60 @@ service cloud.firestore {
     }
   };
 
+  const handleRestoreLog = async (log: AuditLog) => {
+    if (!log.data || !log.data.id) {
+      alert("Error: Restore করার জন্য প্রয়োজনীয় ডাটা পাওয়া যায়নি।");
+      return;
+    }
+
+    if (window.confirm(`আপনি কি নিশ্চিত যে আপনি এই ${log.module} (Ref: ${log.referenceNo}) রিস্টোর করতে চান?`)) {
+      const collName = log.module === 'Requisition' ? 'requisitions' : log.module === 'Debit Voucher' ? 'vouchers' : '';
+      
+      if (!collName) {
+        alert("Error: এই মডিউলটি রিস্টোর করা সম্ভব নয়।");
+        return;
+      }
+
+      try {
+        await saveToCloud(collName, log.data, 'Restore');
+        alert('সফলভাবে রিস্টোর করা হয়েছে!');
+      } catch (error) {
+        console.error("Restore failed:", error);
+        alert("রিস্টোর করতে সমস্যা হয়েছে। অনুগ্রহ করে আবার চেষ্টা করুন।");
+      }
+    }
+  };
+
+  const handleDeleteLog = async (id: string) => {
+    if (window.confirm('Are you sure you want to permanently delete this log entry? This cannot be undone.')) {
+      await deleteDoc(doc(db, 'audit_log', id));
+      alert('Log entry deleted.');
+    }
+  };
+
+  const handleViewLog = (log: AuditLog) => {
+    setViewingLog(log);
+    // You might want a new view type for viewing logs, e.g., 'VIEW_LOG'
+    // For now, we can just log to console or use an alert.
+    alert(`View Log:\nModule: ${log.module}\nOperation: ${log.operation}\nRef: ${log.referenceNo}\nUser: ${log.user}`);
+  };
+
+  const handlePreviewLog = (log: AuditLog) => {
+    switch (log.module) {
+      case 'Requisition':
+        setViewingRequisition(log.data as RequisitionData);
+        setCurrentView('VIEW_REQUISITION');
+        setTimeout(() => window.print(), 800);
+        break;
+      case 'Debit Voucher':
+        setViewingDV(log.data as DebitVoucherData);
+        setCurrentView('VIEW_DV');
+        setTimeout(() => window.print(), 800);
+        break;
+      default:
+        alert('No preview available for this module.');
+    }
+  };
   const onUpdateStatus = async (collName: 'requisitions' | 'vouchers', id: string, status: 'Pending' | 'Approved' | 'Processed') => {
     const collectionRef = collName === 'requisitions' ? requisitions : debitVouchers;
     const item = collectionRef.find(i => i.id === id);
@@ -323,7 +378,7 @@ service cloud.firestore {
         users.forEach(u => { if (!existingIds.includes(u.id)) deleteFromCloud('users', u.id); });
         list.forEach(u => saveToCloud('users', u));
       }} onViewChange={setCurrentView} />;
-      case 'DB_ARCHIVE': return <DatabaseArchive logs={auditLogs} onRestore={() => {}} onDelete={() => {}} onView={() => {}} onPreview={() => {}} />;
+      case 'DB_ARCHIVE': return <DatabaseArchive logs={auditLogs} onRestore={handleRestoreLog} onDelete={handleDeleteLog} onView={handleViewLog} onPreview={handlePreviewLog} />;
       default: return <DashboardHome onViewChange={setCurrentView} activeUserCount={activeUsers.length} requisitions={requisitions} vouchers={debitVouchers} sisters={sisters} user={user} />;
     }
   };
