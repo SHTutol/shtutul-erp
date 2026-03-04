@@ -183,7 +183,7 @@ export const DebitVoucher: React.FC<DebitVoucherProps> = ({
               margin: 0 auto !important;
               width: 7in !important;
               height: 8in !important;
-              padding: 0.02in 0.2in 0.2in 0.2in !important;
+              padding: 0.2in 0.3in 0.3in 0.2in !important;
               display: flex !important;
               flex-direction: column !important;
               font-family: serif !important;
@@ -220,10 +220,10 @@ export const DebitVoucher: React.FC<DebitVoucherProps> = ({
         <div className="no-print mb-4 w-full max-w-[7in] flex justify-between items-center bg-white p-4 rounded-3xl border border-slate-200 shadow-xl">
            <button onClick={() => onViewChange?.('DV_LIST')} className="p-2.5 bg-slate-100 text-slate-600 rounded-xl hover:bg-slate-200 transition-all"><ArrowLeft size={18} /></button>
            <div className="flex gap-2">
-             <button onClick={handleSaveAsPDF} className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white font-bold rounded-2xl text-xs hover:bg-blue-700 transition-all shadow-2xl active:scale-95 uppercase">
+             <button onClick={handleSaveAsPDF} className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white font-bold rounded-2xl text-xs hover:bg-blue-700 transition-all shadow-2xl active:scale-100 uppercase">
                <Download size={16} /> Save as PDF
              </button>
-             <button onClick={handlePrint} className="flex items-center gap-2 px-8 py-3 bg-slate-900 text-white font-bold rounded-2xl text-xs hover:bg-slate-800 transition-all shadow-2xl active:scale-95 uppercase">
+             <button onClick={handlePrint} className="flex items-center gap-2 px-8 py-3 bg-slate-900 text-white font-bold rounded-2xl text-xs hover:bg-slate-800 transition-all shadow-2xl active:scale-100 uppercase">
                <Printer size={16} /> Print Voucher
              </button>
            </div>
@@ -234,13 +234,13 @@ export const DebitVoucher: React.FC<DebitVoucherProps> = ({
             <div className="text-center mb-1">
               <h1 className="text-[20px] font-black leading-tight uppercase mb-0">{data.sisterConcern || 'AZLAN KNIT DYEING LTD.'}</h1>
               <h2 className="text-[13px] font-bold uppercase mt-0 mb-0">{data.unit || 'KNIT DYEING UNIT'}</h2>
-              <p className="text-[8px] font-medium">House no. 315, Road No. 4, Baridhara DOHS, Dhaka-1206</p>
+              <p className="text-[12px] font-bold" style={{ fontFamily: "'Times New Roman', serif" }}>House no. 315, Road No. 4, Baridhara DOHS, Dhaka-1206</p>
             </div>
 
             <div className="flex justify-between items-start px-1 mt-1 mb-1">
               <div className="flex items-center gap-1 mt-auto">
-                <span className="text-[10px] font-bold">No.</span>
-                <div className="w-32 border border-black px-2 py-1 text-center font-bold text-[14px] h-[32px] flex items-center justify-center bg-white">
+                <span className="text-[14px] font-bold">No.</span>
+                <div className="w-32 border border-black px-2 py-1 text-center font-bold text-[14px] h-[32px] flex items-center justify-center bg-white"style={{ fontFamily: "'Times New Roman', serif" }}>
                   {data.no}
                 </div>
               </div>
@@ -248,53 +248,59 @@ export const DebitVoucher: React.FC<DebitVoucherProps> = ({
               <div className="flex flex-col w-40 border border-black text-[10px]">
                 <div className="flex border-b border-black">
                   <div className="w-12 px-2 py-1 border-r border-black font-bold bg-gray-50/50 uppercase text-[10px]">Date</div>
-                  <div className="flex-grow px-2 py-1 text-center font-bold">{voucherDate}</div>
+                  <div className="flex-grow px-2 py-1 text-center font-bold text-[14px]" style={{ fontFamily: "'Times New Roman', serif" }}>{voucherDate}</div>
                 </div>
                 <div className="flex">
                   <div className="w-12 px-2 py-1 border-r border-black font-bold bg-gray-50/50 uppercase text-[10px]">Tk.</div>
-                  <div className="flex-grow px-2 py-1 text-right font-black">{data.amountTk > 0 ? data.amountTk.toLocaleString() : '-'} /-</div>
+                  <div className="flex-grow px-6 py-1 text-right font-black text-[14px]" style={{ fontFamily: "'Times New Roman', serif" }}>{data.amountTk > 0 ? data.amountTk.toLocaleString() : '-'} /-</div>
                 </div>
               </div>
             </div>
 
-            <div className="text-center mt-1 mb-1">
-              <h3 className="text-[14px] font-black italic">Debit Voucher (Cash/Cheque)</h3>
+            <div className="text-center mt-2 mb-1">
+              <h3 className="text-[20px] font-black"style={{ fontFamily: "'Times New Roman', serif" }}>Debit Voucher (Cash/Cheque)</h3>
             </div>
 
             <div className="space-y-2 px-1 flex-grow">
               <div className="flex border border-black">
                 <div className="px-3 py-1.5 border-r border-black font-bold whitespace-nowrap bg-gray-50/50 text-[10px]">Paid to Mr/Messrs</div>
-                <div className="flex-grow px-3 py-1.5 font-bold italic text-[13px] flex items-center sentencecase">{data.paidTo}</div>
+                <div className="flex-grow px-3 py-1.5 font-bold text-[13px] flex items-center sentencecase"style={{ fontFamily: "'Times New Roman', serif" }}>{data.paidTo}</div>
               </div>
               
               <div className="flex items-end gap-2">
-                <span className="text-[10px] font-bold whitespace-nowrap mb-1">Taka (in words)</span>
-                <div className="flex-grow border-b border-black font-bold italic text-[12px] px-2 min-h-[24px] flex items-center pb-0.5 sentencecase">
+                <span className="text-[13px] whitespace-nowrap mb-1"style={{ fontFamily: "'Times New Roman', serif" }}>Taka (in words)</span>
+                <div className="flex-grow border-b border-black font-bold text-[13px] px-2 min-h-[24px] flex items-center pb-0.5 sentencecase" style={{ fontFamily: "'Times New Roman', serif" }}>
                   {numberToWords(data.amountTk)}
                 </div>
               </div>
 
               <div className="flex items-end gap-2">
-                <span className="text-[10px] font-medium whitespace-nowrap mb-1">Cash/Cheque/P.O/No.</span>
+                <span className="text-[13px] font-medium whitespace-nowrap mb-1"style={{ fontFamily: "'Times New Roman', serif" }}>Cash/Cheque/P.O/No.</span>
                 <div className="flex-grow border-b border-black font-bold px-2 italic text-[11px] pb-0.5 min-h-[20px] flex items-center">{data.paymentNo}</div>
-                <span className="text-[10px] font-medium whitespace-nowrap ml-2 mb-1">Date</span>
+                <span className="text-[13px] font-medium whitespace-nowrap ml-2 mb-1">Date</span>
                 <div className="w-28 border-b border-black font-bold px-2 text-center text-[11px] pb-0.5 min-h-[20px] flex items-center justify-center">{instrumentDate}</div>
               </div>
 
               <div className="flex items-end gap-2">
-                <span className="text-[10px] font-medium whitespace-nowrap mb-1">On</span>
+                <span className="text-[13px] font-medium whitespace-nowrap mb-1"style={{ fontFamily: "'Times New Roman', serif" }}>On</span>
                 <div className="flex-grow border-b border-black font-bold px-2 italic text-[11px] pb-0.5 min-h-[20px] flex items-center">{data.bankName}</div>
-                <span className="text-[10px] font-medium whitespace-nowrap ml-2 mb-1">A/C No</span>
+                <span className="text-[13px] font-medium whitespace-nowrap ml-2 mb-1">Bank A/C No</span>
                 <div className="w-40 border-b border-black font-bold px-2 text-[11px] pb-0.5 min-h-[20px] flex items-center">{data.bankAccountNo}</div>
               </div>
 
               <div className="flex items-start gap-1">
-                <span className="text-[10px] font-bold mt-1 whitespace-nowrap">For</span>
-                <div className="flex-grow border-b border-black font-bold text-[10px] px-1 sentencecase leading-4 break-words min-h-[32px] pt-1"
-                     style={{ 
-                       backgroundImage: 'linear-gradient(transparent 23px, rgba(0,0,0,0.8) 23px, rgba(0,0,0,0.8) 24px, transparent 24px)', 
-                       backgroundSize: '100% 24px' 
-                     }}>
+                <span className="text-[13px] mt-2 whitespace-nowrap">For</span>
+                <div 
+                  className="flex-grow font-bold text-[13px] px-1 sentencecase leading-[24px] break-words pt-[2px]" 
+                  style={{ 
+                    fontFamily: "'Times New Roman', serif",
+                    minHeight: '52px', // ২ লাইনের জন্য অন্তত ৫২px (২৪+২৪+অতিরিক্ত ৪px)
+                    backgroundImage: 'linear-gradient(transparent 23px, rgba(0,0,0,1) 23px, rgba(0,0,0,1) 24px, transparent 24px)', 
+                    backgroundSize: '100% 24px',
+                    backgroundRepeat: 'repeat',
+                    backgroundPosition: '0 0'
+                  }}
+                >
                   {data.for}
                 </div>
               </div>
@@ -309,28 +315,28 @@ export const DebitVoucher: React.FC<DebitVoucherProps> = ({
                       <th className="border border-black p-0" colSpan={2}>
                         <div className="border-b border-black p-2">Amount</div>
                         <div className="flex">
-                           <div className="flex-grow border-r border-black p-1">Tk.</div>
-                           <div className="w-10 p-1 text-[9px]">Ps.</div>
+                           <div className="flex-grow border-r border-black w-14 p-1">Tk.</div>
+                           <div className="w-10 p-1 text-[10px]">Ps.</div>
                         </div>
                       </th>
                       <th className="border border-black p-1 w-24">Signature of Recipient</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {[...Array(9)].map((_, i) => (
+                    {[...Array(6)].map((_, i) => (
                       <tr key={i} className="h-[22px]">
-                        <td className="border border-black text-center px-2 font-bold italic sentencecase align-middle">{i === 0 ? data.accountHead : ''}</td>
+                        <td className="border border-black text-center px-8 font-bold text-[14px] sentencecase align-middle"style={{ fontFamily: "'Times New Roman', serif" }}>{i === 0 ? data.accountHead : ''}</td>
                         <td className="border border-black"></td>
                         <td className="border border-black"></td>
-                        <td className="border border-black text-right px-2 font-bold align-middle">{i === 0 && data.amountTk > 0 ? data.amountTk.toLocaleString() : ''}</td>
-                        <td className="border border-black text-right text-[9px] w-10 align-middle">{i === 0 && data.amountTk > 0 ? '00' : ''}</td>
+                        <td className="border border-black text-right px-5 font-bold text-[14px] align-middle"style={{ fontFamily: "'Times New Roman', serif" }}>{i === 0 && data.amountTk > 0 ? data.amountTk.toLocaleString() : ''}</td>
+                        <td className="border border-black text-right text-[10px] w-10 align-middle">{i === 0 && data.amountTk > 0 ? '00' : ''}</td>
                         <td className="border border-black"></td>
                       </tr>
                     ))}
                     <tr className="h-[26px] font-black bg-gray-50/30">
                       <td className="border border-black" colSpan={3}></td>
-                      <td className="border border-black text-right px-2 font-black align-middle">{data.amountTk > 0 ? data.amountTk.toLocaleString() : '-'}</td>
-                      <td className="border border-black text-center text-[9px] w-10 align-middle">{data.amountTk > 0 ? '00' : ''}</td>
+                      <td className="border border-black text-right px-4 font-black text-[14px] align-middle"style={{ fontFamily: "'Times New Roman', serif" }}>{data.amountTk > 0 ? data.amountTk.toLocaleString() : '-'}</td>
+                      <td className="border border-black text-center text-[10px] w-10 align-middle">{data.amountTk > 0 ? '00' : ''}</td>
                       <td className="border border-black"></td>
                     </tr>
                   </tbody>
@@ -342,7 +348,7 @@ export const DebitVoucher: React.FC<DebitVoucherProps> = ({
               </div>
             </div>
 
-            <div className="mt-auto mb-1 px-1 flex justify-between items-end text-[10px] font-bold w-full" style={{ pageBreakInside: 'avoid' }}>
+            <div className="mt-8 mb-1 px-1 flex justify-between items-end text-[10px] font-bold w-full" style={{ pageBreakInside: 'avoid' }}>
               <div className="flex flex-col items-center">
                 <div className="w-24 border-t border-black mb-1"></div>
                 <span>Prepared by</span>

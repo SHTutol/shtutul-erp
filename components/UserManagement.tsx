@@ -1,7 +1,6 @@
 
 import React, { useState, useRef, useEffect } from 'react';
-import { ViewType } from '../App';
-import { User } from '../types';
+import { User, ViewType } from '../types';
 import { 
   Plus, 
   Pencil, 
@@ -21,7 +20,9 @@ import {
   Cloud,
   RefreshCw,
   Wifi,
-  WifiOff
+  WifiOff,
+  Eye,
+  EyeOff
 } from 'lucide-react';
 
 interface UserManagementProps {
@@ -56,6 +57,8 @@ export const UserManagement: React.FC<UserManagementProps> = ({ onViewChange, us
     role: 'Staff',
     permissions: ['DASHBOARD'] as string[]
   });
+
+  const [showPassword, setShowPassword] = useState(false);
 
   const modalInputRef = useRef<HTMLInputElement>(null);
 
@@ -369,12 +372,19 @@ export const UserManagement: React.FC<UserManagementProps> = ({ onViewChange, us
                   <div className="relative group">
                     <Key className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-indigo-600 transition-colors" size={18} />
                     <input 
-                      type="password" 
+                      type={showPassword ? "text" : "password"} 
                       value={formData.password}
                       onChange={(e) => setFormData({...formData, password: e.target.value})}
                       placeholder="••••••••"
-                      className="w-full pl-12 pr-4 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-black text-slate-900 outline-none focus:border-indigo-600 focus:bg-white transition-all text-sm"
+                      className="w-full pl-12 pr-12 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-black text-slate-900 outline-none focus:border-indigo-600 focus:bg-white transition-all text-sm"
                     />
+                    <button 
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-indigo-600 transition-colors"
+                    >
+                      {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                    </button>
                   </div>
                 </div>
               </div>

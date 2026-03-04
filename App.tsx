@@ -13,13 +13,14 @@ import { DebitVoucherList } from './components/DebitVoucherList';
 import { DatabaseArchive } from './components/DatabaseArchive';
 import { Login } from './components/Login';
 import { UserManagement } from './components/UserManagement';
-import { RequisitionData, UnitRecord, DebitVoucherData, PayeeRecord, SisterRecord, User, AuditLog } from './types';
+import { RequisitionData, UnitRecord, DebitVoucherData, PayeeRecord, SisterRecord, User, AuditLog, ViewType } from './types';
 import { db } from './firebase';
 import { 
   collection, 
   onSnapshot, 
   doc, 
   setDoc, 
+  getDocs,
   deleteDoc,
   query,
   orderBy,
@@ -57,9 +58,8 @@ import {
   Wifi
 } from 'lucide-react';
 
-export type ViewType = 'DASHBOARD' | 'REQ_LIST' | 'REQUISITION' | 'VIEW_REQUISITION' | 'DV_LIST' | 'DEBIT_VOUCHER' | 'VIEW_DV' | 'REQ_REPORT' | 'DV_REPORT' | 'NEW_NAME' | 'NEW_SISTER' | 'UNIT_ENTRY' | 'USER_MANAGEMENT' | 'DB_ARCHIVE';
-
 export default function App() {
+  console.log('App component is being called');
   const [users, setUsers] = useState<User[]>([]);
   const [requisitions, setRequisitions] = useState<RequisitionData[]>([]);
   const [debitVouchers, setDebitVouchers] = useState<DebitVoucherData[]>([]);
@@ -99,7 +99,7 @@ service cloud.firestore {
 
   // Heartbeat Effect: Update lastSeen every 30 seconds
   useEffect(() => {
-    if (!user) return;
+    if (!user || !user.id) return;
 
     const updatePresence = async () => {
       try {
@@ -170,16 +170,17 @@ service cloud.firestore {
       await setDoc(doc(db, collName, data.id), data);
       
       // Audit Log
+      const logRef = doc(collection(db, 'audit_log'));
       const log: AuditLog = {
-        id: `${Date.now()}`,
-        timestamp: Date.now(),
+        id: logRef.id,
+        timestamp: serverTimestamp(),
         user: user?.name || 'Unknown',
         module: collName === 'requisitions' ? 'Requisition' : collName === 'vouchers' ? 'Debit Voucher' : 'Settings',
         operation: operation,
         referenceNo: data.requisitionNo || data.no || data.name || data.id,
         data: data
       };
-      await setDoc(doc(db, 'audit_log', log.id), log);
+      await setDoc(logRef, log);
 
       setIsOnline(true);
       setPermissionError(false);
@@ -209,16 +210,17 @@ service cloud.firestore {
 
       // Audit Log
       if (itemToDelete) {
+        const logRef = doc(collection(db, 'audit_log'));
         const log: AuditLog = {
-          id: `${Date.now()}`,
-          timestamp: Date.now(),
+          id: logRef.id,
+          timestamp: serverTimestamp(),
           user: user?.name || 'Unknown',
           module: collName === 'requisitions' ? 'Requisition' : 'Debit Voucher',
           operation: 'Delete',
           referenceNo: (itemToDelete as RequisitionData).requisitionNo || (itemToDelete as DebitVoucherData).no,
           data: itemToDelete
         };
-        await setDoc(doc(db, 'audit_log', log.id), log);
+        await setDoc(logRef, log);
       }
 
       setIsOnline(true);
@@ -312,16 +314,17 @@ service cloud.firestore {
         await saveToCloud(collName, updatedItem, 'Update');
         
         // Audit Log for status change
+        const logRef = doc(collection(db, 'audit_log'));
         const log: AuditLog = {
-          id: `${Date.now()}`,
-          timestamp: Date.now(),
+          id: logRef.id,
+          timestamp: serverTimestamp(),
           user: user?.name || 'Unknown',
           module: collName === 'requisitions' ? 'Requisition' : 'Debit Voucher',
           operation: status === 'Approved' ? 'Approve' : status === 'Processed' ? 'Process' : 'Update',
           referenceNo: (item as RequisitionData).requisitionNo || (item as DebitVoucherData).no,
           data: updatedItem
         };
-        await setDoc(doc(db, 'audit_log', log.id), log);
+        await setDoc(logRef, log);
 
       } catch (error) {
         // Handle failed save if necessary
@@ -428,21 +431,27 @@ service cloud.firestore {
       case 'DASHBOARD': return <DashboardHome onViewChange={setCurrentView} activeUserCount={activeUsers.length} requisitions={requisitions} vouchers={debitVouchers} sisters={sisters} user={user} />;
       case 'REQ_LIST': return <RequisitionList requisitions={requisitions} onDelete={(id) => deleteFromCloud('requisitions', id)} onAdd={() => { setEditingRequisition(null); setCurrentView('REQUISITION'); }} onEdit={(req) => { setEditingRequisition(req); setCurrentView('REQUISITION'); }} onView={(req) => { setViewingRequisition(req); setCurrentView('VIEW_REQUISITION'); }} onPreview={(req) => { setViewingRequisition(req); setCurrentView('VIEW_REQUISITION'); setTimeout(() => { window.print(); }, 800); }} onViewChange={setCurrentView} onUpdateStatus={(id, status) => onUpdateStatus('requisitions', id, status)} />;
       case 'REQUISITION': return <RequisitionForm onViewChange={setCurrentView} onSave={async (data) => { 
-        // Generate number at the moment of saving to prevent race condition duplicates
-        const currentYear = new Date().getFullYear().toString().slice(-2);
-        const yearSuffix = `/${currentYear}`;
-        const thisYearReqs = requisitions.filter(r => r.requisitionNo.endsWith(yearSuffix));
+        let finalNo = data.requisitionNo;
+
+        // Only generate new number if creating new (not editing)
+        if (!editingRequisition) {
+          // Generate number at the moment of saving to prevent race condition duplicates
+          const currentYear = new Date().getFullYear().toString().slice(-2);
+          const yearSuffix = `/${currentYear}`;
+          const thisYearReqs = requisitions.filter(r => r.requisitionNo.endsWith(yearSuffix));
+          
+          let maxNum = 0;
+          thisYearReqs.forEach(r => {
+            const match = r.requisitionNo.match(/REQ-(\d+)/i);
+            if (match) {
+              const n = parseInt(match[1], 10);
+              if (n > maxNum) maxNum = n;
+            }
+          });
+          
+          finalNo = `REQ-${(maxNum + 1).toString().padStart(4, '0')}${yearSuffix}`;
+        }
         
-        let maxNum = 0;
-        thisYearReqs.forEach(r => {
-          const match = r.requisitionNo.match(/REQ-(\d+)/i);
-          if (match) {
-            const n = parseInt(match[1], 10);
-            if (n > maxNum) maxNum = n;
-          }
-        });
-        
-        const finalNo = `REQ-${(maxNum + 1).toString().padStart(4, '0')}${yearSuffix}`;
         const finalData = { ...data, requisitionNo: finalNo };
         
         await saveToCloud('requisitions', finalData); 
@@ -452,21 +461,27 @@ service cloud.firestore {
       case 'DV_LIST': return <DebitVoucherList vouchers={debitVouchers} onDelete={(id) => deleteFromCloud('vouchers', id)} onAdd={() => { setEditingDV(null); setCurrentView('DEBIT_VOUCHER'); }} onEdit={(dv) => { setEditingDV(dv); setCurrentView('DEBIT_VOUCHER'); }} onView={(dv) => { setViewingDV(dv); setCurrentView('VIEW_DV'); }} onPreview={(dv) => { setViewingDV(dv); setCurrentView('VIEW_DV'); }} onViewChange={setCurrentView} onUpdateStatus={(id, status) => onUpdateStatus('vouchers', id, status)} />;
       case 'DEBIT_VOUCHER': 
         return <DebitVoucher onViewChange={setCurrentView} onSave={async (newData) => { 
-          // Generate number at the moment of saving to prevent race condition duplicates
-          const currentYear = new Date().getFullYear().toString().slice(-2);
-          const yearSuffix = `/${currentYear}`;
-          const thisYearVouchers = debitVouchers.filter(dv => dv.no.endsWith(yearSuffix));
+          let finalNo = newData.no;
+
+          // Only generate new number if creating new (not editing)
+          if (!editingDV) {
+            // Generate number at the moment of saving to prevent race condition duplicates
+            const currentYear = new Date().getFullYear().toString().slice(-2);
+            const yearSuffix = `/${currentYear}`;
+            const thisYearVouchers = debitVouchers.filter(dv => dv.no.endsWith(yearSuffix));
+            
+            let maxNum = 0;
+            thisYearVouchers.forEach(dv => {
+              const match = dv.no.match(/DV-(\d+)/i);
+              if (match) {
+                const n = parseInt(match[1], 10);
+                if (n > maxNum) maxNum = n;
+              }
+            });
+            
+            finalNo = `DV-${(maxNum + 1).toString().padStart(4, '0')}${yearSuffix}`;
+          }
           
-          let maxNum = 0;
-          thisYearVouchers.forEach(dv => {
-            const match = dv.no.match(/DV-(\d+)/i);
-            if (match) {
-              const n = parseInt(match[1], 10);
-              if (n > maxNum) maxNum = n;
-            }
-          });
-          
-          const finalNo = `DV-${(maxNum + 1).toString().padStart(4, '0')}${yearSuffix}`;
           const finalData = { ...newData, no: finalNo };
           
           await saveToCloud('vouchers', finalData); 
