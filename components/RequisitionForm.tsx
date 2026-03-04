@@ -198,7 +198,7 @@ export const RequisitionForm: React.FC<RequisitionFormProps> = ({
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2" ref={payeeRef}>
-                <label className="text-[11px] font-black text-slate-500 uppercase tracking-widest flex items-center gap-2">
+                <label className="text-[11px] font-black text-slate-500 Normal case tracking-widest flex items-center gap-2">
                   <User size={14} className="text-purple-600" /> Name of Payee
                 </label>
                 <div className="relative">
@@ -208,7 +208,7 @@ export const RequisitionForm: React.FC<RequisitionFormProps> = ({
                     value={payeeSearch}
                     onFocus={() => setShowPayeeList(true)}
                     onChange={(e) => setPayeeSearch(e.target.value)}
-                    className="w-full pl-6 pr-12 py-5 bg-slate-50 border-2 border-slate-100 rounded-2xl font-black text-slate-800 text-lg outline-none focus:border-purple-600 uppercase" 
+                    className="w-full pl-6 pr-12 py-5 bg-slate-50 border-2 border-slate-100 rounded-2xl font-black text-slate-800 text-lg outline-none focus:border-purple-600 Normal case" 
                   />
                   {showPayeeList && (
                     <div className="absolute top-full left-0 right-0 z-[100] mt-2 bg-white border-2 border-slate-200 rounded-2xl shadow-2xl max-h-60 overflow-y-auto">
@@ -217,7 +217,7 @@ export const RequisitionForm: React.FC<RequisitionFormProps> = ({
                           key={payee.id}
                           type="button"
                           onClick={() => handlePayeeSelect(payee.name)}
-                          className="w-full text-left px-6 py-4 hover:bg-purple-50 transition-colors border-b border-slate-50 font-black text-slate-700 uppercase text-sm"
+                          className="w-full text-left px-6 py-4 hover:bg-purple-50 transition-colors border-b border-slate-50 font-black text-slate-700 Normal case text-sm"
                         >
                           {payee.name}
                         </button>
@@ -233,7 +233,7 @@ export const RequisitionForm: React.FC<RequisitionFormProps> = ({
                   name="through"
                   value={data.through}
                   onChange={handleChange}
-                  className="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl px-6 py-5 font-black text-slate-800 outline-none focus:border-purple-600 transition-all text-lg uppercase" 
+                  className="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl px-6 py-5 font-black text-slate-800 outline-none focus:border-purple-600 transition-all text-lg Normal case" 
                 />
               </div>
             </div>
@@ -245,7 +245,7 @@ export const RequisitionForm: React.FC<RequisitionFormProps> = ({
                   name="purpose"
                   value={data.purpose}
                   onChange={handleChange}
-                  className="w-full h-24 bg-slate-50 border-2 border-slate-100 rounded-2xl px-6 py-4 font-black text-slate-800 outline-none focus:border-purple-600 transition-all resize-none text-base uppercase" 
+                  className="w-full h-24 bg-slate-50 border-2 border-slate-100 rounded-2xl px-6 py-4 font-black text-slate-800 outline-none focus:border-purple-600 transition-all resize-none text-base Normal case" 
                 />
               </div>
               <div className="space-y-2">
@@ -255,19 +255,19 @@ export const RequisitionForm: React.FC<RequisitionFormProps> = ({
                   name="typeOfRequisition"
                   value={data.typeOfRequisition}
                   onChange={handleChange}
-                  className="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl px-6 py-5 font-black text-slate-800 outline-none focus:border-purple-600 h-[96px] text-lg uppercase" 
+                  className="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl px-6 py-5 font-black text-slate-800 outline-none focus:border-purple-600 h-[96px] text-lg Normal case" 
                 />
               </div>
               <div className="space-y-2">
                 <label className="text-[11px] font-black text-slate-500 uppercase tracking-widest">Amount TK</label>
                 <div className="relative">
-                   <div className="absolute left-8 top-1/2 -translate-y-1/2 font-black text-white/50 text-2xl">৳</div>
+                   <div className="absolute left-4 top-1/2 -translate-y-1/2 font-black text-white/50 text-2xl">৳</div>
                    <input 
                     type="number" 
                     name="amountTk"
                     value={data.amountTk || ''}
                     onChange={handleChange}
-                    className="w-full h-[96px] bg-slate-900 text-white border-none rounded-3xl px-12 py-4 font-black text-3xl outline-none focus:ring-8 focus:ring-purple-600/20 text-right tabular-nums" 
+                    className="w-full h-[120px] bg-slate-900 text-white border-none rounded-3xl px-12 py-4 font-black text-2xl outline-none focus:ring-8 focus:ring-purple-600/20 text-right tabular-nums" 
                   />
                 </div>
               </div>
