@@ -176,7 +176,7 @@ export const NewNameEntry: React.FC<NewNameEntryProps> = ({ onViewChange, payees
       <div className="overflow-auto max-h-[70vh]">
         <table className="w-full text-left border-collapse">
           <thead>
-            <tr className="bg-[#EFEFEF] border-b border-gray-300 text-[#333] font-bold text-[12px] uppercase tracking-wide">
+            <tr className="bg-[#EFEFEF] border-b border-gray-300 text-[#333] font-bold text-[12px] Normal case tracking-wide">
               <th className="px-4 py-2 border-r border-gray-300 text-center w-12">SL</th>
               <th className="px-4 py-2 border-r border-gray-300">Person Name</th>
               <th className="px-4 py-2 border-r border-gray-300">Phone Number</th>
@@ -199,7 +199,7 @@ export const NewNameEntry: React.FC<NewNameEntryProps> = ({ onViewChange, payees
                     type="text" 
                     value={record.name}
                     onChange={(e) => handleNameChange(record.id, e.target.value)}
-                    className="w-full bg-transparent outline-none font-bold uppercase placeholder:text-gray-300"
+                    className="w-full bg-transparent outline-none font-bold Normal case placeholder:text-gray-300"
                     placeholder="ENTER NAME..."
                   />
                 </td>
@@ -217,7 +217,7 @@ export const NewNameEntry: React.FC<NewNameEntryProps> = ({ onViewChange, payees
                     type="text" 
                     value={record.particulars || ''}
                     onChange={(e) => handleParticularsChange(record.id, e.target.value)}
-                    className="w-full bg-transparent outline-none font-medium placeholder:text-gray-300 italic"
+                    className="w-full bg-transparent outline-none font-medium placeholder:text-gray-300"
                     placeholder="ENTER DEFAULT PARTICULARS..."
                   />
                 </td>
@@ -237,7 +237,7 @@ export const NewNameEntry: React.FC<NewNameEntryProps> = ({ onViewChange, payees
       </div>
       
       {/* Footer Info */}
-      <div className="bg-[#F3F3F3] border-t border-gray-300 p-2 flex justify-between items-center text-[11px] text-gray-500 font-bold uppercase">
+      <div className="bg-[#F3F3F3] border-t border-gray-300 p-2 flex justify-between items-center text-[11px] text-gray-500 font-bold Normal case">
         <span>Total Names: {filtered.length}</span>
         <span>Selected: {selectedId ? payees.find(n => n.id === selectedId)?.name : 'None'}</span>
       </div>
