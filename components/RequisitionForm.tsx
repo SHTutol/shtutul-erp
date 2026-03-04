@@ -306,13 +306,15 @@ export const RequisitionForm: React.FC<RequisitionFormProps> = ({
               <div className="flex justify-between items-end mb-2 font-bold px-1">
                 <div className="flex items-center gap-1">
                   <span className="text-[12px] uppercase font-bold">DATE:</span>
-                  <div className="px-3 py-0.5 min-w-[120px] text-center font-bold text-[14px]">
+                  <div className="px-3 py-0.5 min-w-[120px] text-center font-bold text-[14px]" style={{ fontFamily: "'Times New Roman', serif" }}>
                     {previewDate}
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="text-[12px] font-bold uppercase">REQUISITION NO:</span>
-                  <span className="min-w-[60px] text-center font-bold text-[14px]">{data.requisitionNo.split('-').pop() || '001'}</span>
+                  <span className="min-w-[60px] text-center font-bold text-[14px]" style={{ fontFamily: "'Times New Roman', serif" }}>
+                    {data.requisitionNo.split('-').pop() || '001'}
+                  </span>
                 </div>
               </div>
 
@@ -350,7 +352,7 @@ export const RequisitionForm: React.FC<RequisitionFormProps> = ({
                   </div>
                   <div className="flex items-end gap-3 h-8">
                     <span className="whitespace-nowrap font-bold uppercase text-[12px]">AMOUNT TK:</span>
-                    <div className="w-32 border-b border-black font-bold text-[14px] text-right px-2 ">
+                    <div className="w-32 border-b border-black font-bold text-[14px] text-right px-2 " style={{ fontFamily: "'Times New Roman', serif" }}>
                       {data.amountTk.toLocaleString()}/-
                     </div>
                   </div>
