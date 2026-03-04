@@ -449,7 +449,7 @@ service cloud.firestore {
         setCurrentView('REQ_LIST'); 
       }} editingData={editingRequisition} nextReqNo={getNextReqNo()} availableUnits={units} availablePayees={payees} availableSisters={sisters} />;
       case 'VIEW_REQUISITION': return <RequisitionForm onViewChange={setCurrentView} onPrint={() => setCurrentView('REQ_LIST')} editingData={viewingRequisition} readOnly={true} availableUnits={units} availablePayees={payees} availableSisters={sisters} />;
-      case 'DV_LIST': return <DebitVoucherList vouchers={debitVouchers} onDelete={(id) => deleteFromCloud('vouchers', id)} onAdd={() => { setEditingDV(null); setCurrentView('DEBIT_VOUCHER'); }} onEdit={(dv) => { setEditingDV(dv); setCurrentView('DEBIT_VOUCHER'); }} onView={(dv) => { setViewingDV(dv); setCurrentView('VIEW_DV'); }} onPreview={(dv) => { setViewingDV(dv); setCurrentView('VIEW_DV'); setTimeout(() => { window.print(); }, 800); }} onViewChange={setCurrentView} onUpdateStatus={(id, status) => onUpdateStatus('vouchers', id, status)} />;
+      case 'DV_LIST': return <DebitVoucherList vouchers={debitVouchers} onDelete={(id) => deleteFromCloud('vouchers', id)} onAdd={() => { setEditingDV(null); setCurrentView('DEBIT_VOUCHER'); }} onEdit={(dv) => { setEditingDV(dv); setCurrentView('DEBIT_VOUCHER'); }} onView={(dv) => { setViewingDV(dv); setCurrentView('VIEW_DV'); }} onPreview={(dv) => { setViewingDV(dv); setCurrentView('VIEW_DV'); }} onViewChange={setCurrentView} onUpdateStatus={(id, status) => onUpdateStatus('vouchers', id, status)} />;
       case 'DEBIT_VOUCHER': 
         return <DebitVoucher onViewChange={setCurrentView} onSave={async (newData) => { 
           // Generate number at the moment of saving to prevent race condition duplicates

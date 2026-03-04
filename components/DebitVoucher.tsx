@@ -1,5 +1,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
+import { jsPDF } from 'jspdf';
+import html2canvas from 'html2canvas';
 import { DebitVoucherData, UnitRecord, PayeeRecord, SisterRecord } from '../types';
 import { numberToWords } from '../utils/numberToWords';
 import { 
@@ -13,7 +15,8 @@ import {
   User,
   CheckCircle,
   X,
-  ChevronLeft
+  ChevronLeft,
+  Download
 } from 'lucide-react';
 import { ViewType } from '../App';
 
@@ -121,30 +124,124 @@ export const DebitVoucher: React.FC<DebitVoucherProps> = ({
   const voucherDate = formatDate(data.date);
   const instrumentDate = formatDate(data.chequeDate);
 
+  const voucherRef = useRef<HTMLDivElement>(null);
+
+  const handleSaveAsPDF = async () => {
+    if (!voucherRef.current) return;
+    
+    const canvas = await html2canvas(voucherRef.current, {
+      scale: 2,
+      useCORS: true,
+      logging: false,
+      backgroundColor: '#ffffff'
+    });
+    
+    const imgData = canvas.toDataURL('image/png');
+    const pdf = new jsPDF({
+      orientation: 'portrait',
+      unit: 'in',
+      format: [7, 8] 
+    });
+    
+    const imgProps = pdf.getImageProperties(imgData);
+    const pdfWidth = pdf.internal.pageSize.getWidth();
+    const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+    
+    pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+    
+    // Open in new window
+    const blob = pdf.output('blob');
+    const url = URL.createObjectURL(blob);
+    window.open(url, '_blank');
+    
+    // Also download it
+    pdf.save(`DebitVoucher_${data.no}.pdf`);
+  };
+
+  const handlePrint = () => {
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) {
+      alert('Please allow popups to print the voucher.');
+      return;
+    }
+
+    const content = voucherRef.current?.outerHTML || '';
+    const styles = Array.from(document.querySelectorAll('style, link[rel="stylesheet"]'))
+      .map(s => s.outerHTML)
+      .join('\n');
+
+    printWindow.document.write(`
+      <html>
+        <head>
+          <title>Debit Voucher - ${data.no}</title>
+          ${styles}
+          <style>
+            body { background: white !important; margin: 0 !important; padding: 0 !important; }
+            .debit-voucher-paper { 
+              box-shadow: none !important; 
+              border: none !important; 
+              margin: 0 auto !important;
+              width: 7in !important;
+              height: 8in !important;
+              padding: 0.02in 0.2in 0.2in 0.2in !important;
+              display: flex !important;
+              flex-direction: column !important;
+              font-family: serif !important;
+            }
+            @media print {
+              @page { size: 7in 8in; margin: 0 !important; }
+              .no-print { display: none !important; }
+            }
+          </style>
+        </head>
+        <body style="margin:0; padding:0;">
+          <div>
+            ${content}
+          </div>
+          <script>
+            window.onload = () => {
+              setTimeout(() => {
+                window.print();
+                window.onfocus = () => { setTimeout(() => window.close(), 500); };
+              }, 1000);
+            };
+          </script>
+        </body>
+      </html>
+    `);
+    printWindow.document.close();
+    onPrint?.();
+  };
+
   // PREVIEW / READ-ONLY MODE
   if (readOnly) {
     return (
       <div className="w-full flex flex-col items-center pt-0">
-        <div className="no-print mb-4 w-full max-w-[5.83in] flex justify-between items-center bg-white p-4 rounded-3xl border border-slate-200 shadow-xl">
+        <div className="no-print mb-4 w-full max-w-[7in] flex justify-between items-center bg-white p-4 rounded-3xl border border-slate-200 shadow-xl">
            <button onClick={() => onViewChange?.('DV_LIST')} className="p-2.5 bg-slate-100 text-slate-600 rounded-xl hover:bg-slate-200 transition-all"><ArrowLeft size={18} /></button>
-           <button onClick={() => { window.print(); onPrint?.(); }} className="flex items-center gap-2 px-8 py-3 bg-slate-900 text-white font-bold rounded-2xl text-xs hover:bg-slate-800 transition-all shadow-2xl active:scale-95 uppercase">
-             <Printer size={16} /> Print Voucher
-           </button>
+           <div className="flex gap-2">
+             <button onClick={handleSaveAsPDF} className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white font-bold rounded-2xl text-xs hover:bg-blue-700 transition-all shadow-2xl active:scale-95 uppercase">
+               <Download size={16} /> Save as PDF
+             </button>
+             <button onClick={handlePrint} className="flex items-center gap-2 px-8 py-3 bg-slate-900 text-white font-bold rounded-2xl text-xs hover:bg-slate-800 transition-all shadow-2xl active:scale-95 uppercase">
+               <Printer size={16} /> Print Voucher
+             </button>
+           </div>
         </div>
         
         <div className="bg-white p-0 shadow-2xl overflow-hidden rounded-xl mb-20 print:shadow-none print:m-0">
-          <div className="debit-voucher-paper font-serif text-black bg-white flex flex-col h-full relative border border-gray-100 print:border-none">
-            <div className="text-center mb-2">
+          <div ref={voucherRef} className="debit-voucher-paper font-serif text-black bg-white flex flex-col h-full relative border border-gray-100 print:border-none">
+            <div className="text-center mb-1">
               <h1 className="text-[20px] font-black leading-tight uppercase mb-0">{data.sisterConcern || 'AZLAN KNIT DYEING LTD.'}</h1>
-              <h2 className="text-[15px] font-bold uppercase mt-0 mb-0">{data.unit || 'KNIT DYEING UNIT'}</h2>
-              <p className="text-[12px] font-medium">House no. 315, Road No. 4, Baridhara DOHS, Dhaka-1206</p>
+              <h2 className="text-[13px] font-bold uppercase mt-0 mb-0">{data.unit || 'KNIT DYEING UNIT'}</h2>
+              <p className="text-[8px] font-medium">House no. 315, Road No. 4, Baridhara DOHS, Dhaka-1206</p>
             </div>
 
             <div className="flex justify-between items-start px-1 mt-1 mb-1">
               <div className="flex items-center gap-1 mt-auto">
                 <span className="text-[10px] font-bold">No.</span>
-                <div className="w-32 border border-black px-2 py-1 text-center font-bold text-[13px] h-[28px] flex items-center justify-center">
-                  {data.no.split('-').pop()}
+                <div className="w-32 border border-black px-2 py-1 text-center font-bold text-[14px] h-[32px] flex items-center justify-center bg-white">
+                  {data.no}
                 </div>
               </div>
 
@@ -164,39 +261,39 @@ export const DebitVoucher: React.FC<DebitVoucherProps> = ({
               <h3 className="text-[14px] font-black italic">Debit Voucher (Cash/Cheque)</h3>
             </div>
 
-            <div className="space-y-3 px-1 flex-grow">
+            <div className="space-y-2 px-1 flex-grow">
               <div className="flex border border-black">
                 <div className="px-3 py-1.5 border-r border-black font-bold whitespace-nowrap bg-gray-50/50 text-[10px]">Paid to Mr/Messrs</div>
                 <div className="flex-grow px-3 py-1.5 font-bold italic text-[13px] flex items-center sentencecase">{data.paidTo}</div>
               </div>
               
               <div className="flex items-end gap-2">
-                <span className="text-[10px] font-bold whitespace-nowrap">Taka (in words)</span>
-                <div className="flex-grow border-b border-black font-bold italic text-[12px] px-2 min-h-[20px] flex items-end sentencecase">
+                <span className="text-[10px] font-bold whitespace-nowrap mb-1">Taka (in words)</span>
+                <div className="flex-grow border-b border-black font-bold italic text-[12px] px-2 min-h-[24px] flex items-center pb-0.5 sentencecase">
                   {numberToWords(data.amountTk)}
                 </div>
               </div>
 
               <div className="flex items-end gap-2">
-                <span className="text-[10px] font-medium whitespace-nowrap">Cash/Cheque/P.O/No.</span>
-                <div className="flex-grow border-b border-black font-bold px-2 italic text-[11px]">{data.paymentNo}</div>
-                <span className="text-[10px] font-medium whitespace-nowrap ml-2">Date</span>
-                <div className="w-28 border-b border-black font-bold px-2 text-center text-[11px]">{instrumentDate}</div>
+                <span className="text-[10px] font-medium whitespace-nowrap mb-1">Cash/Cheque/P.O/No.</span>
+                <div className="flex-grow border-b border-black font-bold px-2 italic text-[11px] pb-0.5 min-h-[20px] flex items-center">{data.paymentNo}</div>
+                <span className="text-[10px] font-medium whitespace-nowrap ml-2 mb-1">Date</span>
+                <div className="w-28 border-b border-black font-bold px-2 text-center text-[11px] pb-0.5 min-h-[20px] flex items-center justify-center">{instrumentDate}</div>
               </div>
 
               <div className="flex items-end gap-2">
-                <span className="text-[10px] font-medium whitespace-nowrap">On</span>
-                <div className="flex-grow border-b border-black font-bold px-2 italic text-[11px]">{data.bankName}</div>
-                <span className="text-[10px] font-medium whitespace-nowrap ml-2">A/C No</span>
-                <div className="w-40 border-b border-black font-bold px-2 text-[11px]">{data.bankAccountNo}</div>
+                <span className="text-[10px] font-medium whitespace-nowrap mb-1">On</span>
+                <div className="flex-grow border-b border-black font-bold px-2 italic text-[11px] pb-0.5 min-h-[20px] flex items-center">{data.bankName}</div>
+                <span className="text-[10px] font-medium whitespace-nowrap ml-2 mb-1">A/C No</span>
+                <div className="w-40 border-b border-black font-bold px-2 text-[11px] pb-0.5 min-h-[20px] flex items-center">{data.bankAccountNo}</div>
               </div>
 
-              <div className="flex items-start gap-2">
+              <div className="flex items-start gap-1">
                 <span className="text-[10px] font-bold mt-1 whitespace-nowrap">For</span>
-                <div className="flex-grow border-b border-black font-bold text-[10px] px-2 sentencecase leading-5 break-words min-h-[40px]"
+                <div className="flex-grow border-b border-black font-bold text-[10px] px-1 sentencecase leading-4 break-words min-h-[32px] pt-1"
                      style={{ 
-                       backgroundImage: 'linear-gradient(transparent 19px, black 19.5px)', 
-                       backgroundSize: '100% 20px' 
+                       backgroundImage: 'linear-gradient(transparent 23px, rgba(0,0,0,0.8) 23px, rgba(0,0,0,0.8) 24px, transparent 24px)', 
+                       backgroundSize: '100% 24px' 
                      }}>
                   {data.for}
                 </div>
@@ -210,7 +307,7 @@ export const DebitVoucher: React.FC<DebitVoucherProps> = ({
                       <th className="border border-black p-1 w-12">Control</th>
                       <th className="border border-black p-1 w-12">Subsidiary</th>
                       <th className="border border-black p-0" colSpan={2}>
-                        <div className="border-b border-black p-1">Amount</div>
+                        <div className="border-b border-black p-2">Amount</div>
                         <div className="flex">
                            <div className="flex-grow border-r border-black p-1">Tk.</div>
                            <div className="w-10 p-1 text-[9px]">Ps.</div>
@@ -220,20 +317,20 @@ export const DebitVoucher: React.FC<DebitVoucherProps> = ({
                     </tr>
                   </thead>
                   <tbody>
-                    {[...Array(8)].map((_, i) => (
+                    {[...Array(9)].map((_, i) => (
                       <tr key={i} className="h-[22px]">
-                        <td className="border border-black text-center px-2 font-bold italic sentencecase">{i === 0 ? data.accountHead : ''}</td>
+                        <td className="border border-black text-center px-2 font-bold italic sentencecase align-middle">{i === 0 ? data.accountHead : ''}</td>
                         <td className="border border-black"></td>
                         <td className="border border-black"></td>
-                        <td className="border border-black text-right px-2 font-bold">{i === 0 && data.amountTk > 0 ? data.amountTk.toLocaleString() : ''}</td>
-                        <td className="border border-black text-right text-[9px] w-10">{i === 0 && data.amountTk > 0 ? '00' : ''}</td>
+                        <td className="border border-black text-right px-2 font-bold align-middle">{i === 0 && data.amountTk > 0 ? data.amountTk.toLocaleString() : ''}</td>
+                        <td className="border border-black text-right text-[9px] w-10 align-middle">{i === 0 && data.amountTk > 0 ? '00' : ''}</td>
                         <td className="border border-black"></td>
                       </tr>
                     ))}
-                    <tr className="h-[28px] font-black bg-gray-50/30">
+                    <tr className="h-[26px] font-black bg-gray-50/30">
                       <td className="border border-black" colSpan={3}></td>
-                      <td className="border border-black text-right px-2 font-black">{data.amountTk > 0 ? data.amountTk.toLocaleString() : '-'}</td>
-                      <td className="border border-black text-center text-[9px] w-10">{data.amountTk > 0 ? '00' : ''}</td>
+                      <td className="border border-black text-right px-2 font-black align-middle">{data.amountTk > 0 ? data.amountTk.toLocaleString() : '-'}</td>
+                      <td className="border border-black text-center text-[9px] w-10 align-middle">{data.amountTk > 0 ? '00' : ''}</td>
                       <td className="border border-black"></td>
                     </tr>
                   </tbody>
@@ -245,7 +342,7 @@ export const DebitVoucher: React.FC<DebitVoucherProps> = ({
               </div>
             </div>
 
-            <div className="mt-6 mb-4 px-1 flex justify-between items-end text-[10px] font-bold w-full">
+            <div className="mt-auto mb-1 px-1 flex justify-between items-end text-[10px] font-bold w-full" style={{ pageBreakInside: 'avoid' }}>
               <div className="flex flex-col items-center">
                 <div className="w-24 border-t border-black mb-1"></div>
                 <span>Prepared by</span>

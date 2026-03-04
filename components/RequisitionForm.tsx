@@ -261,13 +261,13 @@ export const RequisitionForm: React.FC<RequisitionFormProps> = ({
               <div className="space-y-2">
                 <label className="text-[11px] font-black text-slate-500 uppercase tracking-widest">Amount TK</label>
                 <div className="relative">
-                   <div className="absolute left-6 top-1/2 -translate-y-1/2 font-black text-white/50 text-2xl">৳</div>
+                   <div className="absolute left-8 top-1/2 -translate-y-1/2 font-black text-white/50 text-2xl">৳</div>
                    <input 
                     type="number" 
                     name="amountTk"
                     value={data.amountTk || ''}
                     onChange={handleChange}
-                    className="w-full h-[96px] bg-slate-900 text-white border-none rounded-3xl px-12 py-4 font-black text-5xl outline-none focus:ring-8 focus:ring-purple-600/20 text-right tabular-nums" 
+                    className="w-full h-[96px] bg-slate-900 text-white border-none rounded-3xl px-12 py-4 font-black text-3xl outline-none focus:ring-8 focus:ring-purple-600/20 text-right tabular-nums" 
                   />
                 </div>
               </div>
@@ -306,27 +306,27 @@ export const RequisitionForm: React.FC<RequisitionFormProps> = ({
               <div className="flex justify-between items-end mb-2 font-bold px-1">
                 <div className="flex items-center gap-1">
                   <span className="text-[12px] uppercase font-bold">DATE:</span>
-                  <div className="px-3 py-0.5 min-w-[120px] text-center font-bold text-[16px] border-b border-black">
+                  <div className="px-3 py-0.5 min-w-[120px] text-center font-bold text-[14px]">
                     {previewDate}
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="text-[12px] font-bold uppercase">REQUISITION NO:</span>
-                  <span className="min-w-[60px] text-center font-bold text-[20px] border-b border-black">{data.requisitionNo.split('-').pop() || '001'}</span>
+                  <span className="min-w-[60px] text-center font-bold text-[14px]">{data.requisitionNo.split('-').pop() || '001'}</span>
                 </div>
               </div>
 
               <div className="space-y-2 px-1">
                 <div className="flex items-end gap-2 h-6">
-                  <span className="whitespace-nowrap font-bold uppercase text-[12px]">NAME OF PAYEE:,</span>
-                  <div className="flex-grow border-b border-black font-bold text-[12px] normal-case px-2 italic tracking-tight">
+                  <span className="whitespace-nowrap font-bold uppercase text-[12px]">NAME OF PAYEE:</span>
+                  <div className="flex-grow border-b border-black font-bold text-[13px] normal-case px-2 tracking-tight">
                     {data.nameOfPayee}
                   </div>
                 </div>
 
                 <div className="flex items-end gap-2 h-6">
                   <span className="whitespace-nowrap font-bold uppercase text-[12px]">THROUGH:</span>
-                  <div className="flex-grow border-b border-black font-bold text-[12px] normal-case px-2 italic">
+                  <div className="flex-grow border-b border-black font-bold text-[12px] normal-case px-2">
                     {data.through}
                   </div>
                 </div>
@@ -334,7 +334,7 @@ export const RequisitionForm: React.FC<RequisitionFormProps> = ({
                 <div className="flex flex-col gap-0.5">
                   <div className="flex items-end gap-2 h-6">
                     <span className="whitespace-nowrap font-bold uppercase text-[12px]">PURPOSE:</span>
-                    <div className="flex-grow border-b border-black font-bold text-[12px] normal-case px-1 italic h-full flex items-end">
+                    <div className="flex-grow border-b border-black font-bold text-[12px] normal-case px-1 h-full flex items-end">
                       {data.purpose}
                     </div>
                   </div>
@@ -344,13 +344,13 @@ export const RequisitionForm: React.FC<RequisitionFormProps> = ({
                 <div className="flex items-end justify-between gap-2 pt-1">
                   <div className="flex items-end gap-3 flex-grow h-8">
                     <span className="whitespace-nowrap font-bold uppercase text-[12px]">TYPE OF REQUISITION:.</span>
-                    <div className="flex-grow border-b border-black font-bold text-[12px] normal-case px-2 italic">
+                    <div className="flex-grow border-b border-black font-bold text-[12px] normal-case px-2">
                       {data.typeOfRequisition}
                     </div>
                   </div>
                   <div className="flex items-end gap-3 h-8">
                     <span className="whitespace-nowrap font-bold uppercase text-[12px]">AMOUNT TK:</span>
-                    <div className="w-32 border-b border-black font-bold text-[12px] text-right px-2 italic">
+                    <div className="w-32 border-b border-black font-bold text-[14px] text-right px-2 ">
                       {data.amountTk.toLocaleString()}/-
                     </div>
                   </div>
@@ -358,7 +358,7 @@ export const RequisitionForm: React.FC<RequisitionFormProps> = ({
 
                 <div className="flex items-end gap-3 pt-2 h-8">
                   <span className="whitespace-nowrap font-bold uppercase text-[12px]">AMOUNT IN WORDS.</span>
-                  <div className="flex-grow border-b border-black font-bold normal-case text-[12px] px-2 italic leading-tight">
+                  <div className="flex-grow border-b border-black font-bold normal-case text-[14px] px-2 leading-tight">
                     {numberToWords(data.amountTk)}
                   </div>
                 </div>
@@ -371,7 +371,7 @@ export const RequisitionForm: React.FC<RequisitionFormProps> = ({
 
               <div className="mt-3 text-center">
                 <p className="font-bold text-[13px] mb-1">Recommended by</p>
-                <p className="font-bold text-[10px] uppercase tracking-widest text-black/80">CHECKED BY /MANAGER/AGM/DGM/GM/SR. GM. GM (A/C)</p>
+                <p className="font-bold text-[10px] uppercase tracking-widest text-black/80">CHECKED BY /MANAGER/AGM/DGM/SR.DGM/GM/SR.GM(A/C)</p>
               </div>
 
               <div className="mt-6 flex justify-between items-end px-1">

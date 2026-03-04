@@ -47,7 +47,7 @@ body {
     width: 8.2in !important;
     height: 5.8in !important;
     margin: 0 !important; 
-    padding: 0.02in 0.2in 0.2in 0.2in !important; 
+    padding: 0.05in 0.2in 0.2in 0.2in !important; 
     box-shadow: none !important;
     border: none !important;
     page-break-after: always;
@@ -67,10 +67,10 @@ body {
 
   .debit-voucher-paper {
     page: portrait-page;
-    width: 5.8in !important;
-    height: 8.15in !important; /* Slightly reduced height to force single page print */
+    width: 7in !important;
+    height: 8in !important; /* Slightly reduced height to force single page print */
     margin: 0 auto !important;
-    padding: 0.2in 0.3in 0.3in 0.3in !important;
+    padding: 0.02in 0.2in 0.2in 0.2in !important;
     box-shadow: none !important;
     border: none !important;
     page-break-after: always;
