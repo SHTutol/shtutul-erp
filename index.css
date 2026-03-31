@@ -1,3 +1,6 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 /* Standard CSS */
 :root {
@@ -30,91 +33,88 @@ body {
   animation: fadeOut 3s forwards;
 }
 
-/* Print Specific Configuration */
+/* -----------------------------------------------------------
+   PRINT CONFIGURATION (হেডারের জায়গা কমানোর জন্য ফিক্সড কোড)
+   ----------------------------------------------------------- */
 @media print {
-  .no-print {
-    display: none !important;
+  /* কাগজের চারপাশের ডিফল্ট মার্জিন একদম জিরো করা */
+  @page {
+    size: A4 portrait;
+    margin: 0 !important; 
   }
-  
-  body {
-    background-color: white !important;
+
+  html, body {
+    height: auto !important;
+    overflow: visible !important;
+    background: white !important;
     margin: 0 !important;
     padding: 0 !important;
+    width: 100% !important;
   }
 
-  .requisition-paper {
-    page: landscape-page;
-    width: 8.2in !important;
-    height: 5.8in !important;
-    margin: 0 !important; 
-    padding: 0.05in 0.2in 0.2in 0.2in !important; 
-    box-shadow: none !important;
-    border: none !important;
-    page-break-after: always;
-    overflow: hidden;
-    position: relative;
-    background: white !important;
-    color: black !important;
-    box-sizing: border-box;
+  /* অপ্রয়োজনীয় এলিমেন্ট হাইড করা */
+  .no-print, aside, header, footer, button, .toast-box, .fixed, .absolute:not(.requisition-paper) {
+    display: none !important;
+    visibility: hidden !important;
+  }
+
+  /* মেইন কন্টেইনার রিসেট */
+  #root, main, .flex-grow {
     display: block !important;
-    font-size: 12px;
+    margin: 0 !important;
+    padding: 0 !important;
+    visibility: visible !important;
   }
 
-  @page portrait-page {
-    size: A4 portrait;
-    margin: 0.1in !important;
-  }
-
-  .debit-voucher-paper {
-    page: portrait-page;
-    width: 7in !important;
-    height: 8in !important; /* Slightly reduced height to force single page print */
-    margin: 0 auto !important;
-    padding: 0.02in 0.2in 0.2in 0.2in !important;
-    box-shadow: none !important;
-    border: none !important;
-    page-break-after: always;
-    page-break-inside: avoid;
-    overflow: hidden !important;
-    position: relative;
-    background: white !important;
-    color: black !important;
-    box-sizing: border-box !important;
+  /* রিকুইজিশন পেপার: এটাকে কাগজের একদম উপরে পুশ করা হয়েছে */
+  .requisition-paper {
     display: flex !important;
     flex-direction: column !important;
-    font-size: 11px;
-  }
-
-
-  @page landscape-page {
-    size: A4 landscape;
-    margin: 0.2in !important;
-  }
-
-  .report-landscape {
-    page: landscape-page;
+    min-height: 297mm !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    margin: 0 !important;
+    padding: 3mm 10mm 20mm 10mm !important; /* উপরে ৩ মিমি এবং নিচে ২০ মিমি গ্যাপ রাখা হয়েছে */
     width: 100% !important;
-    max-width: none !important;
+    box-shadow: none !important;
+    border: none !important;
+    background: white !important;
+    font-family: 'Times New Roman', Times, serif !important;
+    box-sizing: border-box !important;
+  }
+
+  /* হেডার এলিমেন্টগুলোর ডিফল্ট মার্জিন জিরো করা (এটিই হেডারের স্পেস কমাবে) */
+  .requisition-paper h1, 
+  .requisition-paper h2, 
+  .requisition-paper h3 {
     margin: 0 !important;
     padding: 0 !important;
-    background: white !important;
+    line-height: 1.5 !important;
+  }
+
+  .requisition-paper div {
+    margin-top: 0 !important;
+  }
+
+  /* বর্ডার সেটিংস */
+  .border-b, .print-line, [style*="border-bottom"] { 
+    border-bottom: 2px solid black !important; 
+    display: inline-block !important;
+  }
+  .border-t, [style*="border-top"] { 
+    border-top: 2px solid black !important; 
     display: block !important;
-    font-size: 10px !important;
-    overflow: visible !important;
   }
 
-  .report-landscape table {
-    width: 100% !important;
-    table-layout: auto !important;
-    border-collapse: collapse !important;
-  }
-
-  .report-landscape th, .report-landscape td {
-    border: 1px solid #e2e8f0 !important;
-    padding: 4px 8px !important;
+  .requisition-paper * {
+    visibility: visible !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
   }
 }
 
+/* Scrollbar Styles */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;

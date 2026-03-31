@@ -69,8 +69,12 @@ export default function App() {
   const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
   
   const [user, setUser] = useState<User | null>(() => {
-    const saved = localStorage.getItem('shtutul_erp_user');
-    return saved ? JSON.parse(saved) : null;
+    try {
+      const saved = localStorage.getItem('shtutul_erp_user');
+      return saved ? JSON.parse(saved) : null;
+    } catch (e) {
+      return null;
+    }
   });
   
   const [currentView, setCurrentView] = useState<ViewType>('DASHBOARD');
@@ -520,7 +524,7 @@ service cloud.firestore {
   const isListView = ['REQ_LIST', 'DV_LIST', 'REQ_REPORT', 'DV_REPORT', 'NEW_NAME', 'NEW_SISTER', 'UNIT_ENTRY', 'USER_MANAGEMENT'].includes(currentView);
 
   return (
-    <div className="flex h-screen bg-slate-50 overflow-hidden font-sans">
+    <div className="flex min-h-screen bg-slate-50 font-sans">
       <aside className={`no-print bg-slate-900 text-white flex flex-col transition-all duration-500 ease-in-out shadow-2xl z-50 ${isSidebarOpen ? 'w-72' : 'w-24'}`}>
         <div className="h-24 flex items-center justify-between px-6 border-b border-white/5 bg-slate-950">
           <div className={`overflow-hidden transition-all duration-300 ${isSidebarOpen ? 'w-auto' : 'w-0'}`}>
@@ -632,7 +636,7 @@ service cloud.firestore {
              <RefreshCw size={12} className={isOnline ? "animate-spin text-indigo-500" : "text-red-500"} /> 
              System Status: <span className={isOnline ? "text-green-500" : "text-red-500"}>{isOnline ? "Cloud Synchronized" : "Sync Error (Check Permissions)"}</span>
            </div>
-           <div>© 2025 SHTutol ERP - All Rights Reserved</div>
+           <div>© 2026 SHTutol ERP - v1.1.9 - All Rights Reserved</div>
         </footer>
       </main>
 

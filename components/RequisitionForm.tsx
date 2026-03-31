@@ -1,6 +1,5 @@
-
 import React, { useState, useEffect, useRef } from 'react';
-import { RequisitionData, UnitRecord, PayeeRecord, SisterRecord } from '../types';
+import { RequisitionData, UnitRecord, PayeeRecord, SisterRecord, ViewType } from '../types';
 import { numberToWords } from '../utils/numberToWords';
 import { 
   ArrowLeft, 
@@ -13,7 +12,6 @@ import {
   User,
   ArrowRightCircle
 } from 'lucide-react';
-import { ViewType } from '../App';
 
 export interface RequisitionFormProps {
   onViewChange?: (view: ViewType) => void;
@@ -53,9 +51,20 @@ export const RequisitionForm: React.FC<RequisitionFormProps> = ({
     status: 'Pending'
   });
 
+  useEffect(() => {
+    if (!editingData) {
+      setData(prev => ({
+        ...prev,
+        sisterConcern: availableSisters.length > 0 ? availableSisters[0].name : 'SIM FABRICS LIMITED',
+        unit: availableUnits.length > 0 ? availableUnits[0].name : 'KNIT DYEING UNIT'
+      }));
+    }
+  }, [availableSisters, availableUnits, editingData]);
+
   const [payeeSearch, setPayeeSearch] = useState('');
   const [showPayeeList, setShowPayeeList] = useState(false);
   const payeeRef = useRef<HTMLDivElement>(null);
+  const requisitionRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (editingData) {
@@ -112,7 +121,7 @@ export const RequisitionForm: React.FC<RequisitionFormProps> = ({
   }).replace(/\//g, '-');
 
   return (
-    <div className="flex flex-col items-center w-full max-w-[1200px]">
+    <div className="flex flex-col items-center w-full max-w-[1200px] mx-auto">
       {!readOnly && (
         <div className="no-print w-full bg-white rounded-3xl shadow-2xl overflow-hidden border border-slate-200 mb-10">
           <div className="bg-slate-900 px-8 py-6 flex justify-between items-center border-b border-white/10">
@@ -198,7 +207,7 @@ export const RequisitionForm: React.FC<RequisitionFormProps> = ({
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2" ref={payeeRef}>
-                <label className="text-[11px] font-black text-slate-500 Normal case tracking-widest flex items-center gap-2">
+                <label className="text-[11px] font-black text-slate-500 normal-case tracking-widest flex items-center gap-2">
                   <User size={14} className="text-purple-600" /> Name of Payee
                 </label>
                 <div className="relative">
@@ -208,7 +217,7 @@ export const RequisitionForm: React.FC<RequisitionFormProps> = ({
                     value={payeeSearch}
                     onFocus={() => setShowPayeeList(true)}
                     onChange={(e) => setPayeeSearch(e.target.value)}
-                    className="w-full pl-6 pr-12 py-5 bg-slate-50 border-2 border-slate-100 rounded-2xl font-black text-slate-800 text-lg outline-none focus:border-purple-600 Normal case" 
+                    className="w-full pl-6 pr-12 py-5 bg-slate-50 border-2 border-slate-100 rounded-2xl font-black text-slate-800 text-lg outline-none focus:border-purple-600 normal-case" 
                   />
                   {showPayeeList && (
                     <div className="absolute top-full left-0 right-0 z-[100] mt-2 bg-white border-2 border-slate-200 rounded-2xl shadow-2xl max-h-60 overflow-y-auto">
@@ -217,7 +226,7 @@ export const RequisitionForm: React.FC<RequisitionFormProps> = ({
                           key={payee.id}
                           type="button"
                           onClick={() => handlePayeeSelect(payee.name)}
-                          className="w-full text-left px-6 py-4 hover:bg-purple-50 transition-colors border-b border-slate-50 font-black text-slate-700 Normal case text-sm"
+                          className="w-full text-left px-6 py-4 hover:bg-purple-50 transition-colors border-b border-slate-50 font-black text-slate-700 normal-case text-sm"
                         >
                           {payee.name}
                         </button>
@@ -233,7 +242,7 @@ export const RequisitionForm: React.FC<RequisitionFormProps> = ({
                   name="through"
                   value={data.through}
                   onChange={handleChange}
-                  className="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl px-6 py-5 font-black text-slate-800 outline-none focus:border-purple-600 transition-all text-lg Normal case" 
+                  className="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl px-6 py-5 font-black text-slate-800 outline-none focus:border-purple-600 transition-all text-lg normal-case" 
                 />
               </div>
             </div>
@@ -245,7 +254,7 @@ export const RequisitionForm: React.FC<RequisitionFormProps> = ({
                   name="purpose"
                   value={data.purpose}
                   onChange={handleChange}
-                  className="w-full h-24 bg-slate-50 border-2 border-slate-100 rounded-2xl px-6 py-4 font-black text-slate-800 outline-none focus:border-purple-600 transition-all resize-none text-base Normal case" 
+                  className="w-full h-24 bg-slate-50 border-2 border-slate-100 rounded-2xl px-6 py-4 font-black text-slate-800 outline-none focus:border-purple-600 transition-all resize-none text-base normal-case" 
                 />
               </div>
               <div className="space-y-2">
@@ -255,7 +264,7 @@ export const RequisitionForm: React.FC<RequisitionFormProps> = ({
                   name="typeOfRequisition"
                   value={data.typeOfRequisition}
                   onChange={handleChange}
-                  className="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl px-6 py-5 font-black text-slate-800 outline-none focus:border-purple-600 h-[96px] text-lg Normal case" 
+                  className="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl px-6 py-4 font-black text-slate-800 outline-none focus:border-purple-600 h-[64px] text-lg normal-case" 
                 />
               </div>
               <div className="space-y-2">
@@ -287,107 +296,234 @@ export const RequisitionForm: React.FC<RequisitionFormProps> = ({
 
       {readOnly && (
         <div className="w-full flex flex-col items-center pt-0 print:pt-0">
-          <div className="no-print mb-0 w-full max-w-[8.2in] flex justify-between items-center bg-white p-0 rounded-3xl border border-slate-200 shadow-xl">
-             <button onClick={() => onViewChange?.('REQ_LIST')} className="p-2.5 bg-slate-100 text-slate-600 rounded-xl hover:bg-slate-200 transition-all"><ArrowLeft size={18} /></button>
-             <button onClick={handlePrint} className="flex items-center gap-2 px-8 py-3 bg-slate-900 text-white font-bold rounded-2xl text-xs hover:bg-slate-800 transition-all shadow-2xl active:scale-95 uppercase">
-               <Printer size={16} /> Print Voucher
+          <div className="no-print mb-6 w-full max-w-[210mm] flex justify-between items-center bg-white p-4 rounded-3xl border border-slate-200 shadow-xl">
+             <button onClick={() => onViewChange?.('REQ_LIST')} className="p-2.5 bg-slate-100 text-slate-600 rounded-xl hover:bg-slate-200 transition-all active:scale-95"><ArrowLeft size={18} /></button>
+             <div className="text-sm font-bold text-slate-500 uppercase tracking-widest">Print Preview (A4 Size)</div>
+             <button onClick={handlePrint} className="flex items-center gap-2 px-8 py-3 bg-indigo-600 text-white font-bold rounded-xl text-sm hover:bg-indigo-700 shadow-xl active:scale-95 uppercase">
+               <Printer size={18} /> Print Now
              </button>
           </div>
           
-          <div className="bg-white p-0 print:p-0 print:m-0 print:shadow-none shadow-2xl overflow-hidden rounded-xl mb-10 print:mb-0">
-            <div className="requisition-paper bg-white text-black font-serif">
-              
-              <div className="text-center mb-1">
-                <h1 className="text-[34px] font-bold uppercase leading-tight mb-0 tracking-tight">{data.sisterConcern || 'SHTutol ERP SYSTEM'}</h1>
-                <h2 className="text-[20px] font-bold uppercase tracking-[0.1em] mt-0 mb-1">{data.unit || 'UNIT-2'}</h2>
-                <div className="inline-block border-b border-black pb-0.5"><h3 className="text-[16px] font-bold uppercase tracking-[0.2em]">REQUISITION FORM</h3></div>
+          {/* A4 পেপার কন্টেইনার - স্ক্রিনে প্রিভিউ সুন্দর দেখানোর জন্য */}
+          <div className="no-print w-[210mm] h-[297mm] bg-white p-[20mm] shadow-inner mb-10 overflow-hidden rounded-xl">
+             <div 
+              ref={requisitionRef} 
+              className="requisition-paper bg-white text-black w-full h-full mx-auto flex flex-col"
+              style={{ fontFamily: "'Times New Roman', serif", fontSize: '15px' }}
+            >
+              {/* হেডার */}
+              <div className="requisition-header text-center flex flex-col items-center pt-2 print:pt-1">
+                <h1 className="text-[26px] font-bold leading-none m-0 uppercase tracking-tight">
+                  {data.sisterConcern || 'SIM FABRICS LIMITED'}
+                </h1>
+                <h2 className="text-[18px] font-bold leading-none mt-2 mb-0 uppercase">
+                  {data.unit || 'KNIT DYEING UNIT'}
+                </h2>
+                
+                <div className="mt-2 border-b-[2px] border-black">
+                  <h3 className="text-[16px] font-bold leading-none px-4 pb-1 uppercase">
+                    REQUISITION FORM
+                  </h3>
+                </div>
               </div>
 
-              <div className="flex justify-between items-end mb-2 font-bold px-1">
+              {/* তারিখ ও নম্বর */}
+              <div className="flex justify-between items-end mt-6 mb-6 font-bold px-1">
                 <div className="flex items-center gap-1">
-                  <span className="text-[12px] uppercase font-bold">DATE:</span>
-                  <div className="px-3 py-0.5 min-w-[120px] text-center font-bold text-[14px]" style={{ fontFamily: "'Times New Roman', serif" }}>
+                  <span className="text-[15px] font-bold">Date:</span>
+                  <div className="px-2 min-w-[110px] text-left font-bold text-[15px] border-b-[2px] border-black">
                     {previewDate}
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-[12px] font-bold uppercase">REQUISITION NO:</span>
-                  <span className="min-w-[60px] text-center font-bold text-[14px]" style={{ fontFamily: "'Times New Roman', serif" }}>
-                    {data.requisitionNo.split('-').pop() || '001'}
+                <div className="flex items-center gap-1">
+                  <span className="text-[15px] font-bold">Requisition No-</span>
+                  <span className="min-w-[70px] text-right font-bold text-[15px] border-b-[2px] border-black">
+                    {data.requisitionNo.split('-').pop() || '0'}
                   </span>
                 </div>
               </div>
 
-              <div className="space-y-2 px-1">
-                <div className="flex items-end gap-2 h-6">
-                  <span className="whitespace-nowrap font-bold uppercase text-[12px]">NAME OF PAYEE:</span>
-                  <div className="flex-grow border-b border-black font-bold text-[13px] normal-case px-2 tracking-tight">
+              {/* বডি ডাটা */}
+              <div className="space-y-4.5 px-1">
+                <div className="flex items-end gap-2 min-h-[30px]">
+                  <span className="whitespace-nowrap font-bold text-[15px]">Name of Payee</span>
+                  <div className="flex-grow border-b-2 border-black font-bold text-[16px] normal-case px-2 min-h-[24px]">
                     {data.nameOfPayee}
                   </div>
                 </div>
 
-                <div className="flex items-end gap-2 h-6">
-                  <span className="whitespace-nowrap font-bold uppercase text-[12px]">THROUGH:</span>
-                  <div className="flex-grow border-b border-black font-bold text-[12px] normal-case px-2">
+                <div className="flex items-end gap-2 min-h-[30px]">
+                  <span className="whitespace-nowrap font-bold text-[15px]">Through</span>
+                  <div className="flex-grow border-b-2 border-black font-bold text-[16px] normal-case px-2 min-h-[24px]">
                     {data.through}
                   </div>
                 </div>
 
-                <div className="flex flex-col gap-0.5">
-                  <div className="flex items-end gap-2 h-6">
-                    <span className="whitespace-nowrap font-bold uppercase text-[12px]">PURPOSE:</span>
-                    <div className="flex-grow border-b border-black font-bold text-[12px] normal-case px-1 h-full flex items-end">
+                <div className="flex flex-col">
+                  <div className="flex items-end gap-2 min-h-[30px]">
+                    <span className="whitespace-nowrap font-bold text-[15px]">Purpose</span>
+                    <div className="flex-grow border-b-2 border-black font-bold text-[16px] normal-case px-2 min-h-[24px]">
                       {data.purpose}
                     </div>
                   </div>
-                  <div className="border-b border-black h-6"></div>
+                  <div className="border-b-2 border-black h-5"></div>
                 </div>
 
-                <div className="flex items-end justify-between gap-2 pt-1">
-                  <div className="flex items-end gap-3 flex-grow h-8">
-                    <span className="whitespace-nowrap font-bold uppercase text-[12px]">TYPE OF REQUISITION:.</span>
-                    <div className="flex-grow border-b border-black font-bold text-[12px] normal-case px-2">
-                      {data.typeOfRequisition}
+                <div className="grid grid-cols-[1fr_auto] gap-6 items-end">
+                  <div className="flex items-end gap-2 min-h-[32px]">
+                    <span className="whitespace-nowrap font-bold text-[15px] flex-shrink-0">Type of Requisition.</span>
+                    <div className="flex-grow border-b-2 border-black font-bold text-[16px] px-2">{data.typeOfRequisition}</div>
+                  </div>
+                  <div className="flex items-end gap-2 min-h-[32px] flex-shrink-0">
+                    <span className="whitespace-nowrap font-bold text-[15px] flex-shrink-0">Amount Tk</span>
+                    <div className="w-32 border-b-2 border-black font-bold text-[20px] text-right px-2 min-h-[26px]" style={{ fontFamily: "'Times New Roman', serif" }}>
+                      {data.amountTk > 0 ? `${data.amountTk.toLocaleString()}/-` : '-'}
                     </div>
                   </div>
-                  <div className="flex items-end gap-3 h-8">
-                    <span className="whitespace-nowrap font-bold uppercase text-[12px]">AMOUNT TK:</span>
-                    <div className="w-32 border-b border-black font-bold text-[14px] text-right px-2 " style={{ fontFamily: "'Times New Roman', serif" }}>
-                      {data.amountTk.toLocaleString()}/-
-                    </div>
+                </div>
+
+                <div className="flex items-end gap-2 pt-1 min-h-[32px]">
+                  <span className="whitespace-nowrap font-bold text-[15px] flex-shrink-0">Amount in Words.</span>
+                  <div className="flex-grow border-b-2 border-black font-bold normal-case text-[16px] px-2 min-h-[26px] leading-tight italic uppercase">
+                    {data.amountTk > 0 ? `${numberToWords(data.amountTk)}` : ''}
                   </div>
                 </div>
 
-                <div className="flex items-end gap-3 pt-2 h-8">
-                  <span className="whitespace-nowrap font-bold uppercase text-[12px]">AMOUNT IN WORDS.</span>
-                  <div className="flex-grow border-b border-black font-bold normal-case text-[14px] px-2 leading-tight">
-                    {numberToWords(data.amountTk)}
-                  </div>
-                </div>
-
-                <div className="flex items-end gap-2 pt-2 h-6">
-                  <span className="whitespace-nowrap font-bold uppercase text-[12px]">INDENTED BY</span>
-                  <div className=""></div>
+                <div className="flex items-end gap-2 pt-1 h-8">
+                  <span className="whitespace-nowrap font-bold text-[15px]">Indented by</span>
                 </div>
               </div>
 
-              <div className="mt-3 text-center">
-                <p className="font-bold text-[13px] mb-1">Recommended by</p>
-                <p className="font-bold text-[10px] uppercase tracking-widest text-black/80">CHECKED BY /MANAGER/AGM/DGM/SR.DGM/GM/SR.GM(A/C)</p>
-              </div>
-
-              <div className="mt-6 flex justify-between items-end px-1">
-                <div className="flex flex-col items-center">
-                  <div className="w-20 border-t border-black mb-1"></div>
-                  <span className="text-[10px] font-bold uppercase tracking-widest">(SIGNATURE)</span>
+              <div className="mt-[20pt]">
+                <div className="text-center">
+                  <p className="font-bold text-[15px] mb-2">Recommended by</p>
+                  <p className="font-bold text-[12px] uppercase text-black inline-block px-4">
+                    CHECKED BY / MANAGER / AGM / DGM / GM / SR. GM / GM (A/C)
+                  </p>
                 </div>
-                
-                <div className="flex items-end gap-3">
-                  <span className="text-[11px] font-bold uppercase whitespace-nowrap">APPROVE BY</span>
-                  <div className="w-44 border-b border-black mb-1"></div>
+
+                <div style={{ height: '40pt' }}></div>
+
+                <div className="flex justify-between items-end px-1">
+                  <div className="flex flex-col items-center">
+                    <div className="w-44 border-t-2 border-black mb-1.5"></div>
+                    <span className="text-[12px] font-bold uppercase tracking-tight">(SIGNATURE)</span>
+                  </div>
+                  
+                  <div className="flex items-center gap-1">
+                    <span className="text-[15px] font-bold whitespace-nowrap">Approved by</span>
+                    <span className="w-44 border-b-2 border-black">&nbsp;</span>
+                  </div>
                 </div>
               </div>
             </div>
+          </div>
+
+          {/* প্রিন্ট করার জন্য আসল কন্টেইনার - এটি শুধুমাত্র প্রিন্ট করার সময় দৃশ্যমান হবে */}
+          <div className="print-only requisition-paper bg-white text-black w-full min-h-[297mm] mx-auto flex flex-col"
+              style={{ fontFamily: "'Times New Roman', serif", fontSize: '15px' }}
+          >
+              {/* প্রিভিউ কন্টেইনারের একই JSX এখানে রিপিট হবে (কোড বাদ না দেয়ার স্বার্থে) */}
+              <div className="requisition-header text-center flex flex-col items-center pt-2 print:pt-1">
+                <h1 className="text-[32px] font-bold leading-none m-0 uppercase tracking-tight print:mt-0">
+                  {data.sisterConcern || 'SIM FABRICS LIMITED'}
+                </h1>
+                <h2 className="text-[20px] font-bold leading-none mt-2 mb-0 uppercase">
+                  {data.unit || 'KNIT DYEING UNIT'}
+                </h2>
+                
+                <div className="mt-2 border-b-[2px] border-black">
+                  <h3 className="text-[18px] font-bold leading-none px-4 pb-1 uppercase">
+                    REQUISITION FORM
+                  </h3>
+                </div>
+              </div>
+
+              <div className="flex justify-between items-end mt-6 mb-6 font-bold px-1">
+                <div className="flex items-center gap-1">
+                  <span className="text-[15px] font-bold">Date:</span>
+                  <div className="px-2 min-w-[110px] text-left font-bold text-[15px] border-b-[2px] border-black">
+                    {previewDate}
+                  </div>
+                </div>
+                <div className="flex items-center gap-1">
+                  <span className="text-[18px] font-bold">Requisition No-</span>
+                  <span className="min-w-[70px] text-right font-bold text-[15px] border-b-[2px] border-black">
+                    {data.requisitionNo.split('-').pop() || '0'}
+                  </span>
+                </div>
+              </div>
+
+              <div className="space-y-5 px-1">
+                <div className="flex items-end gap-2 min-h-[30px]">
+                  <span className="whitespace-nowrap font-bold text-[15px]">Name of Payee</span>
+                  <div className="flex-grow border-b-2 border-black font-bold text-[16px] normal-case px-2 min-h-[24px]">
+                    {data.nameOfPayee}
+                  </div>
+                </div>
+
+                <div className="flex items-end gap-4 min-h-[30px]">
+                  <span className="whitespace-nowrap font-bold text-[15px]">Through</span>
+                  <div className="flex-grow border-b-2 border-black font-bold text-[16px] normal-case px-2 min-h-[24px]">
+                    {data.through}
+                  </div>
+                </div>
+
+                <div className="flex flex-col">
+                  <div className="flex items-end gap-2 min-h-[34px]">
+                    <span className="whitespace-nowrap font-bold text-[15px]">Purpose</span>
+                    <div className="flex-grow border-b-2 border-black font-bold text-[16px] normal-case px-2 min-h-[24px]">
+                      {data.purpose}
+                    </div>
+                  </div>
+                  <div className="border-b-2 border-black h-6"></div>
+                </div>
+
+                <div className="grid grid-cols-[1fr_auto] gap-6 items-end">
+                  <div className="flex items-end gap-2 min-h-[32px]">
+                    <span className="whitespace-nowrap font-bold text-[15px] flex-shrink-0">Type of Requisition.</span>
+                    <div className="flex-grow border-b-2 border-black font-bold text-[16px] px-2">{data.typeOfRequisition}</div>
+                  </div>
+                  <div className="flex items-end gap-2 min-h-[32px] flex-shrink-0">
+                    <span className="whitespace-nowrap font-bold text-[15px] flex-shrink-0">Amount Tk</span>
+                    <div className="w-32 border-b-2 border-black font-bold text-[20px] text-right px-2 min-h-[26px]" style={{ fontFamily: "'Times New Roman', serif" }}>
+                      {data.amountTk > 0 ? `${data.amountTk.toLocaleString()}/-` : '-'}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex items-end gap-3 pt-1 min-h-[32px]">
+                  <span className="whitespace-nowrap font-bold text-[15px] flex-shrink-0">Amount in Words.</span>
+                  <div className="flex-grow border-b-2 border-black font-bold normal-case text-[16px] px-2 min-h-[26px] leading-tight italic uppercase">
+                    {data.amountTk > 0 ? `${numberToWords(data.amountTk)}` : ''}
+                  </div>
+                </div>
+                
+                <div className="flex items-end gap-2 pt-1 h-8">
+                  <span className="whitespace-nowrap font-bold text-[15px]">Indented by</span>
+                </div>
+              </div>
+
+              <div className="mt-30pt">
+                <div className="text-center">
+                  <p className="font-bold text-[14px] mb-1.5">Recommended by</p>
+                  <p className="font-bold text-[12px] uppercase text-black">CHECKED BY / MANAGER / AGM / DGM / SR. DGM / GM / SR. GM / GM (A/C)</p>
+                </div>
+
+                <div style={{ height: '40pt' }}></div>
+
+                <div className="flex justify-between items-end px-1">
+                  <div className="flex flex-col items-center">
+                    <div className="w-24 border-t-2 border-black mb-1.5"></div>
+                    <span className="text-[12px] font-bold uppercase tracking-tight">(SIGNATURE)</span>
+                  </div>
+                  
+                  <div className="flex items-center gap-1">
+                    <span className="text-[15px] font-bold whitespace-nowrap">Approved by</span>
+                    <span className="w-44 border-b-2 border-black">&nbsp;</span>
+                  </div>
+                </div>
+              </div>
           </div>
         </div>
       )}
