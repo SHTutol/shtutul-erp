@@ -459,7 +459,11 @@ service cloud.firestore {
         const finalData = { ...data, requisitionNo: finalNo };
         
         await saveToCloud('requisitions', finalData); 
-        setCurrentView('REQ_LIST'); 
+        setViewingRequisition(finalData);
+        setCurrentView('VIEW_REQUISITION');
+        setTimeout(() => {
+          window.print();
+        }, 800);
       }} editingData={editingRequisition} nextReqNo={getNextReqNo()} availableUnits={units} availablePayees={payees} availableSisters={sisters} />;
       case 'VIEW_REQUISITION': return <RequisitionForm onViewChange={setCurrentView} onPrint={() => setCurrentView('REQ_LIST')} editingData={viewingRequisition} readOnly={true} availableUnits={units} availablePayees={payees} availableSisters={sisters} />;
       case 'DV_LIST': return <DebitVoucherList vouchers={debitVouchers} onDelete={(id) => deleteFromCloud('vouchers', id)} onAdd={() => { setEditingDV(null); setCurrentView('DEBIT_VOUCHER'); }} onEdit={(dv) => { setEditingDV(dv); setCurrentView('DEBIT_VOUCHER'); }} onView={(dv) => { setViewingDV(dv); setCurrentView('VIEW_DV'); }} onPreview={(dv) => { setViewingDV(dv); setCurrentView('VIEW_DV'); }} onViewChange={setCurrentView} onUpdateStatus={(id, status) => onUpdateStatus('vouchers', id, status)} />;
@@ -489,7 +493,11 @@ service cloud.firestore {
           const finalData = { ...newData, no: finalNo };
           
           await saveToCloud('vouchers', finalData); 
-          setCurrentView('DV_LIST'); 
+          setViewingDV(finalData);
+          setCurrentView('VIEW_DV');
+          setTimeout(() => {
+            window.print();
+          }, 800);
         }} editingData={editingDV} nextDVNo={getNextDVNo()} availableUnits={units} availablePayees={payees} availableSisters={sisters} />;
       case 'VIEW_DV': return <DebitVoucher onViewChange={setCurrentView} onPrint={() => setCurrentView('DV_LIST')} editingData={viewingDV} readOnly={true} availableUnits={units} availablePayees={payees} availableSisters={sisters} />;
       case 'REQ_REPORT': return <RequisitionReport requisitions={requisitions} onViewChange={setCurrentView} />;
@@ -636,7 +644,7 @@ service cloud.firestore {
              <RefreshCw size={12} className={isOnline ? "animate-spin text-indigo-500" : "text-red-500"} /> 
              System Status: <span className={isOnline ? "text-green-500" : "text-red-500"}>{isOnline ? "Cloud Synchronized" : "Sync Error (Check Permissions)"}</span>
            </div>
-           <div>© 2026 SHTutol ERP - v1.1.9 - All Rights Reserved</div>
+           <div>© 2026 SHTutol ERP - All Rights Reserved</div>
         </footer>
       </main>
 

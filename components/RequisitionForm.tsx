@@ -287,7 +287,7 @@ export const RequisitionForm: React.FC<RequisitionFormProps> = ({
                 type="submit"
                 className="flex-grow px-10 py-5 rounded-2xl bg-purple-600 font-black text-white hover:bg-purple-700 transition-all shadow-2xl flex items-center justify-center gap-3 uppercase text-xl tracking-wider active:scale-[0.98]"
               >
-                <Save size={24} /> Save Requisition
+                <Save size={24} /> Save & Print Requisition
               </button>
             </div>
           </form>
@@ -391,6 +391,7 @@ export const RequisitionForm: React.FC<RequisitionFormProps> = ({
 
                 <div className="flex items-end gap-2 pt-1 h-8">
                   <span className="whitespace-nowrap font-bold text-[15px]">Indented by</span>
+                  <div className="flex-grow border-b-2 border-black h-7"></div>
                 </div>
               </div>
 
@@ -425,15 +426,15 @@ export const RequisitionForm: React.FC<RequisitionFormProps> = ({
           >
               {/* প্রিভিউ কন্টেইনারের একই JSX এখানে রিপিট হবে (কোড বাদ না দেয়ার স্বার্থে) */}
               <div className="requisition-header text-center flex flex-col items-center pt-2 print:pt-1">
-                <h1 className="text-[32px] font-bold leading-none m-0 uppercase tracking-tight print:mt-0">
+                <h1 className="text-[26px] font-bold leading-none m-0 uppercase tracking-tight print:mt-0">
                   {data.sisterConcern || 'SIM FABRICS LIMITED'}
                 </h1>
-                <h2 className="text-[20px] font-bold leading-none mt-2 mb-0 uppercase">
+                <h2 className="text-[18px] font-bold leading-none mt-2 mb-0 uppercase">
                   {data.unit || 'KNIT DYEING UNIT'}
                 </h2>
                 
                 <div className="mt-2 border-b-[2px] border-black">
-                  <h3 className="text-[18px] font-bold leading-none px-4 pb-1 uppercase">
+                  <h3 className="text-[16px] font-bold leading-none px-4 pb-1 uppercase">
                     REQUISITION FORM
                   </h3>
                 </div>
@@ -447,7 +448,7 @@ export const RequisitionForm: React.FC<RequisitionFormProps> = ({
                   </div>
                 </div>
                 <div className="flex items-center gap-1">
-                  <span className="text-[18px] font-bold">Requisition No-</span>
+                  <span className="text-[15px] font-bold">Requisition No-</span>
                   <span className="min-w-[70px] text-right font-bold text-[15px] border-b-[2px] border-black">
                     {data.requisitionNo.split('-').pop() || '0'}
                   </span>
@@ -470,7 +471,7 @@ export const RequisitionForm: React.FC<RequisitionFormProps> = ({
                 </div>
 
                 <div className="flex flex-col">
-                  <div className="flex items-end gap-2 min-h-[34px]">
+                  <div className="flex items-end gap-2 min-h-[30px]">
                     <span className="whitespace-nowrap font-bold text-[15px]">Purpose</span>
                     <div className="flex-grow border-b-2 border-black font-bold text-[16px] normal-case px-2 min-h-[24px]">
                       {data.purpose}
@@ -492,7 +493,7 @@ export const RequisitionForm: React.FC<RequisitionFormProps> = ({
                   </div>
                 </div>
 
-                <div className="flex items-end gap-3 pt-1 min-h-[32px]">
+                <div className="flex items-end gap-2 pt-1 min-h-[32px]">
                   <span className="whitespace-nowrap font-bold text-[15px] flex-shrink-0">Amount in Words.</span>
                   <div className="flex-grow border-b-2 border-black font-bold normal-case text-[16px] px-2 min-h-[26px] leading-tight italic uppercase">
                     {data.amountTk > 0 ? `${numberToWords(data.amountTk)}` : ''}
@@ -504,17 +505,17 @@ export const RequisitionForm: React.FC<RequisitionFormProps> = ({
                 </div>
               </div>
 
-              <div className="mt-30pt">
+              <div className="mt-[20pt]">
                 <div className="text-center">
                   <p className="font-bold text-[14px] mb-1.5">Recommended by</p>
-                  <p className="font-bold text-[12px] uppercase text-black">CHECKED BY / MANAGER / AGM / DGM / SR. DGM / GM / SR. GM / GM (A/C)</p>
+                  <p className="font-bold text-[12px] uppercase text-black">CHECKED BY / MANAGER / AGM / DGM / GM / SR. GM / GM (A/C)</p>
                 </div>
 
                 <div style={{ height: '40pt' }}></div>
 
                 <div className="flex justify-between items-end px-1">
                   <div className="flex flex-col items-center">
-                    <div className="w-24 border-t-2 border-black mb-1.5"></div>
+                    <div className="w-44 border-t-2 border-black mb-1.5"></div>
                     <span className="text-[12px] font-bold uppercase tracking-tight">(SIGNATURE)</span>
                   </div>
                   

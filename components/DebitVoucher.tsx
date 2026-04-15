@@ -505,7 +505,7 @@ export const DebitVoucher: React.FC<DebitVoucherProps> = ({
               type="submit"
               className="w-full py-6 rounded-[1.75rem] bg-[#10B981] font-black text-white hover:bg-green-600 transition-all shadow-2xl shadow-green-500/20 flex items-center justify-center gap-4 uppercase text-2xl tracking-widest active:scale-[0.98]"
             >
-              <Save size={28} /> Save Voucher
+              <Save size={28} /> Save & Print Voucher
             </button>
           </div>
         </form>
