@@ -346,7 +346,7 @@ export const DebitVoucher: React.FC<DebitVoucherProps> = ({
               </div>
             </div>
 
-            <div className="mt-30 mb-1 px-1 flex justify-between items-end text-[10px] font-bold w-full" style={{ pageBreakInside: 'avoid' }}>
+            <div className="mt-20 mb-1 px-1 flex justify-between items-end text-[10px] font-bold w-full" style={{ pageBreakInside: 'avoid' }}>
               <div className="flex flex-col items-center">
                 <div className="w-24 border-t border-black mb-1"></div>
                 <span>Prepared by</span>
