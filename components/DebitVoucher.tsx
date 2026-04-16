@@ -236,9 +236,9 @@ export const DebitVoucher: React.FC<DebitVoucherProps> = ({
         <div className="bg-white p-0 shadow-2xl overflow-hidden rounded-xl mb-20 print:shadow-none print:m-0 w-full max-w-[7in] mx-auto">
           <div ref={voucherRef} className="debit-voucher-paper font-serif text-black bg-white flex flex-col w-full min-h-[8in] p-[0.2in] mx-auto relative border border-gray-100 print:border-none">
             <div className="text-center mt-0 mb-1">
-              <h1 className="text-[20px] font-black leading-tight uppercase mt-0 mb-0">{data.sisterConcern || 'AZLAN KNIT DYEING LTD.'}</h1>
+              <h1 className="text-[26px] font-black leading-tight uppercase mt-0 mb-0">{data.sisterConcern || 'AZLAN KNIT DYEING LTD.'}</h1>
               <h2 className="text-[13px] font-bold uppercase mt-0 mb-0">{data.unit || 'KNIT DYEING UNIT'}</h2>
-              <p className="text-[8px] font-medium">House no. 315, Road No. 4, Baridhara DOHS, Dhaka-1206</p>
+              <p className="text-[10px] font-medium">House no. 315, Road No. 4, Baridhara DOHS, Dhaka-1206</p>
             </div>
 
             <div className="flex justify-between items-start px-1 mt-1 mb-1">
@@ -265,7 +265,7 @@ export const DebitVoucher: React.FC<DebitVoucherProps> = ({
               <h3 className="text-[14px] font-black italic">Debit Voucher (Cash/Cheque)</h3>
             </div>
 
-            <div className="space-y-2 px-1 flex-grow">
+            <div className="space-y-2 px-1">
               <div className="flex border border-black">
                 <div className="px-3 py-1.5 border-r border-black font-bold whitespace-nowrap bg-gray-50/50 text-[10px]">Paid to Mr/Messrs</div>
                 <div className="flex-grow px-3 py-1.5 font-bold italic text-[13px] flex items-center sentencecase">{data.paidTo}</div>
@@ -346,7 +346,7 @@ export const DebitVoucher: React.FC<DebitVoucherProps> = ({
               </div>
             </div>
 
-            <div className="mt-20 mb-1 px-1 flex justify-between items-end text-[10px] font-bold w-full" style={{ pageBreakInside: 'avoid' }}>
+            <div className="mt-[50pt] mb-1 px-1 flex justify-between items-end text-[10px] font-bold w-full" style={{ pageBreakInside: 'avoid' }}>
               <div className="flex flex-col items-center">
                 <div className="w-24 border-t border-black mb-1"></div>
                 <span>Prepared by</span>
