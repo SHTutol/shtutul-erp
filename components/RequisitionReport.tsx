@@ -1,7 +1,6 @@
 
 import React, { useState, useMemo } from 'react';
-import { ViewType } from '../App';
-import { RequisitionData } from '../types';
+import { RequisitionData, ViewType, CompanySettings } from '../types';
 import { 
   FileSpreadsheet, 
   Printer, 
@@ -20,9 +19,10 @@ import {
 interface RequisitionReportProps {
   onViewChange: (view: ViewType) => void;
   requisitions: RequisitionData[];
+  settings: CompanySettings;
 }
 
-export const RequisitionReport: React.FC<RequisitionReportProps> = ({ onViewChange, requisitions }) => {
+export const RequisitionReport: React.FC<RequisitionReportProps> = ({ onViewChange, requisitions, settings }) => {
   // Filter States
   const [refFilter, setRefFilter] = useState('');
   const [payeeFilter, setPayeeFilter] = useState('');
@@ -123,7 +123,57 @@ export const RequisitionReport: React.FC<RequisitionReportProps> = ({ onViewChan
   };
 
   const handlePrint = () => {
-    window.print();
+    const printArea = document.querySelector('.print-area');
+    if (!printArea) return;
+
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) {
+      alert('Please allow popups to print.');
+      return;
+    }
+
+    const content = printArea.outerHTML;
+    const styles = Array.from(document.querySelectorAll('style, link[rel="stylesheet"]'))
+      .map(s => s.outerHTML)
+      .join('\n');
+
+    printWindow.document.write(`
+      <html>
+        <head>
+          <title>Requisition Ledger - ${new Date().toLocaleDateString()}</title>
+          ${styles}
+          <style>
+            @page { size: A4 landscape; margin: 10mm; }
+            body { margin: 0; padding: 0; background: white; }
+            .print-area { 
+              width: 100% !important; 
+              box-shadow: none !important;
+              border: none !important;
+              visibility: visible !important;
+              display: flex !important;
+              flex-direction: column !important;
+            }
+            .no-print { display: none !important; }
+            .hidden.print\\:flex { display: flex !important; }
+            table { width: 100% !important; border-collapse: collapse !important; }
+            th, td { border: 1px solid #e2e8f0 !important; }
+            th { background-color: #f8fafc !important; color: black !important; }
+          </style>
+        </head>
+        <body>
+          ${content}
+          <script>
+            window.onload = () => {
+              setTimeout(() => {
+                window.print();
+                window.close();
+              }, 700);
+            };
+          </script>
+        </body>
+      </html>
+    `);
+    printWindow.document.close();
   };
 
   return (
@@ -225,11 +275,14 @@ export const RequisitionReport: React.FC<RequisitionReportProps> = ({ onViewChan
         {/* Hidden Print Header */}
         <div className="hidden print:flex flex-col items-center mb-4 w-full text-center">
           <div className="flex items-center gap-4 mb-2">
-            <div className="p-3 bg-slate-900 rounded-xl text-white">
-              <Building size={32} />
-            </div>
+            <img 
+              src={settings.logoUrl} 
+              alt="Logo" 
+              className="w-16 h-16 object-contain" 
+              referrerPolicy="no-referrer"
+            />
             <div>
-              <h1 className="text-4xl font-black uppercase tracking-tighter text-slate-900 leading-none">SIM GROUP</h1>
+              <h1 className="text-4xl font-black uppercase tracking-tighter text-slate-900 leading-none">{settings.companyName}</h1>
               <p className="text-[10px] font-bold uppercase tracking-[0.4em] text-slate-500 mt-1">SHTUTUL ERP Financial Services</p>
             </div>
           </div>
@@ -252,7 +305,7 @@ export const RequisitionReport: React.FC<RequisitionReportProps> = ({ onViewChan
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 print:divide-slate-300">
-              {filteredRequisitions.map((row, index) => (
+              {filteredRequisitions.length > 0 ? filteredRequisitions.map((row, index) => (
                 <tr key={row.id} className="hover:bg-slate-50/80 transition-colors group print:break-inside-avoid">
                   <td className="px-4 py-4 text-center font-black text-xs text-slate-400 print:text-slate-900 group-hover:text-slate-900">{(index + 1).toString().padStart(2, '0')}</td>
                   <td className="px-4 py-4 text-center font-bold text-xs text-slate-900 whitespace-nowrap">{row.date}</td>
@@ -266,17 +319,21 @@ export const RequisitionReport: React.FC<RequisitionReportProps> = ({ onViewChan
                     {row.amountTk.toLocaleString()}
                   </td>
                 </tr>
-              ))}
+              )) : (
+                <tr>
+                  <td colSpan={8} className="px-4 py-20 text-center text-slate-400 font-bold uppercase tracking-widest">No records found</td>
+                </tr>
+              )}
+              {filteredRequisitions.length > 0 && (
+                <tr className="bg-slate-50 print:bg-slate-100 border-t-2 border-slate-200 print:border-slate-400 font-black">
+                  <td colSpan={7} className="px-4 py-5 text-right text-xs uppercase text-slate-900 tracking-widest">Total Amount</td>
+                  <td className="px-4 py-5 text-right text-xl text-blue-600 print:text-black tabular-nums">
+                    <span className="text-slate-500 text-sm mr-1">৳</span>
+                    {totalAmount.toLocaleString()}
+                  </td>
+                </tr>
+              )}
             </tbody>
-            <tfoot className="bg-slate-50 print:bg-slate-100">
-              <tr className="border-t-2 border-slate-200 print:border-slate-400">
-                <td colSpan={7} className="px-4 py-5 text-right font-black text-xs uppercase text-slate-900 tracking-widest">Total Amount</td>
-                <td className="px-4 py-5 text-right font-black text-xl text-blue-600 print:text-black tabular-nums">
-                  <span className="text-slate-500 text-sm mr-1">৳</span>
-                  {totalAmount.toLocaleString()}
-                </td>
-              </tr>
-            </tfoot>
           </table>
         </div>
       </div>

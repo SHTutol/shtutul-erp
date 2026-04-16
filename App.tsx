@@ -13,7 +13,8 @@ import { DebitVoucherList } from './components/DebitVoucherList';
 import { DatabaseArchive } from './components/DatabaseArchive';
 import { Login } from './components/Login';
 import { UserManagement } from './components/UserManagement';
-import { RequisitionData, UnitRecord, DebitVoucherData, PayeeRecord, SisterRecord, User, AuditLog, ViewType } from './types';
+import { Settings } from './components/Settings';
+import { RequisitionData, UnitRecord, DebitVoucherData, PayeeRecord, SisterRecord, User, AuditLog, ViewType, CompanySettings } from './types';
 import { db } from './firebase';
 import { 
   collection, 
@@ -28,7 +29,8 @@ import {
   DocumentData,
   Query,
   QueryDocumentSnapshot,
-  serverTimestamp
+  serverTimestamp,
+  getDoc
 } from 'firebase/firestore';
 import { 
   LayoutDashboard, 
@@ -55,7 +57,8 @@ import {
   Terminal,
   CircleCheck,
   Loader2,
-  Wifi
+  Wifi,
+  Settings as SettingsIcon
 } from 'lucide-react';
 
 export default function App() {
@@ -78,6 +81,7 @@ export default function App() {
   });
   
   const [currentView, setCurrentView] = useState<ViewType>('DASHBOARD');
+  const [autoPrint, setAutoPrint] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [showUserDropdown, setShowUserDropdown] = useState(false);
   const [isOnline, setIsOnline] = useState(true);
@@ -91,6 +95,15 @@ export default function App() {
   const [editingDV, setEditingDV] = useState<DebitVoucherData | null>(null);
   const [viewingDV, setViewingDV] = useState<DebitVoucherData | null>(null);
   const [viewingLog, setViewingLog] = useState<AuditLog | null>(null);
+  const [companySettings, setCompanySettings] = useState<CompanySettings>({
+    id: 'company',
+    companyName: 'SIM GROUP',
+    address: 'House # 315, Road # 04, Baridhara D.O.H.S, Dhaka.',
+    logoUrl: '/logo.png',
+    phone: '+88 02 8415961-3',
+    email: 'info@simgroup-bd.com',
+    website: 'www.simgroup-bd.com'
+  });
 
   const ruleCode = `rules_version = '2';
 service cloud.firestore {
@@ -154,9 +167,14 @@ service cloud.firestore {
     const unsubPayees = setupListener('payees', setPayees);
     const unsubSisters = setupListener('sisters', setSisters);
     const unsubAuditLogs = setupListener('audit_log', setAuditLogs, query(collection(db, 'audit_log'), orderBy('timestamp', 'desc')));
+    const unsubSettings = onSnapshot(doc(db, 'settings', 'company'), (doc) => {
+      if (doc.exists()) {
+        setCompanySettings(doc.data() as CompanySettings);
+      }
+    });
 
     return () => {
-      unsubUsers(); unsubReqs(); unsubDVs(); unsubUnits(); unsubPayees(); unsubSisters(); unsubAuditLogs();
+      unsubUsers(); unsubReqs(); unsubDVs(); unsubUnits(); unsubPayees(); unsubSisters(); unsubAuditLogs(); unsubSettings();
     };
   }, []);
 
@@ -293,13 +311,13 @@ service cloud.firestore {
     switch (log.module) {
       case 'Requisition':
         setViewingRequisition(log.data as RequisitionData);
+        setAutoPrint(true);
         setCurrentView('VIEW_REQUISITION');
-        setTimeout(() => window.print(), 800);
         break;
       case 'Debit Voucher':
         setViewingDV(log.data as DebitVoucherData);
+        setAutoPrint(true);
         setCurrentView('VIEW_DV');
-        setTimeout(() => window.print(), 800);
         break;
       default:
         alert('No preview available for this module.');
@@ -348,10 +366,11 @@ service cloud.firestore {
     { id: 'UNIT_ENTRY', label: 'Unit Entry', icon: <Layers size={20} /> },
     { id: 'USER_MANAGEMENT', label: 'User Management', icon: <Users size={20} /> },
     { id: 'DB_ARCHIVE', label: 'Database Archive', icon: <ServerCrash size={20} /> },
+    { id: 'SETTINGS', label: 'Settings', icon: <SettingsIcon size={20} /> },
   ];
 
   const userPermissions = (user?.username === 'admin' || user?.role === 'System Admin') 
-    ? ['DASHBOARD', 'REQ_LIST', 'DV_LIST', 'REQ_REPORT', 'DV_REPORT', 'NEW_NAME', 'NEW_SISTER', 'UNIT_ENTRY', 'USER_MANAGEMENT', 'DB_ARCHIVE']
+    ? ['DASHBOARD', 'REQ_LIST', 'DV_LIST', 'REQ_REPORT', 'DV_REPORT', 'NEW_NAME', 'NEW_SISTER', 'UNIT_ENTRY', 'USER_MANAGEMENT', 'DB_ARCHIVE', 'SETTINGS']
     : (user?.permissions || []);
   const filteredMenuItems = menuItems.filter(item => userPermissions.includes(item.id));
 
@@ -433,8 +452,8 @@ service cloud.firestore {
 
     switch (currentView) {
       case 'DASHBOARD': return <DashboardHome onViewChange={setCurrentView} activeUserCount={activeUsers.length} requisitions={requisitions} vouchers={debitVouchers} sisters={sisters} user={user} />;
-      case 'REQ_LIST': return <RequisitionList requisitions={requisitions} onDelete={(id) => deleteFromCloud('requisitions', id)} onAdd={() => { setEditingRequisition(null); setCurrentView('REQUISITION'); }} onEdit={(req) => { setEditingRequisition(req); setCurrentView('REQUISITION'); }} onView={(req) => { setViewingRequisition(req); setCurrentView('VIEW_REQUISITION'); }} onPreview={(req) => { setViewingRequisition(req); setCurrentView('VIEW_REQUISITION'); setTimeout(() => { window.print(); }, 800); }} onViewChange={setCurrentView} onUpdateStatus={(id, status) => onUpdateStatus('requisitions', id, status)} />;
-      case 'REQUISITION': return <RequisitionForm onViewChange={setCurrentView} onSave={async (data) => { 
+      case 'REQ_LIST': return <RequisitionList requisitions={requisitions} onDelete={(id) => deleteFromCloud('requisitions', id)} onAdd={() => { setEditingRequisition(null); setCurrentView('REQUISITION'); }} onEdit={(req) => { setEditingRequisition(req); setCurrentView('REQUISITION'); }} onView={(req) => { setViewingRequisition(req); setAutoPrint(false); setCurrentView('VIEW_REQUISITION'); }} onPreview={(req) => { setViewingRequisition(req); setAutoPrint(true); setCurrentView('VIEW_REQUISITION'); }} onViewChange={setCurrentView} onUpdateStatus={(id, status) => onUpdateStatus('requisitions', id, status)} />;
+      case 'REQUISITION': return <RequisitionForm onViewChange={setCurrentView} onSave={async (data, shouldPrint) => { 
         let finalNo = data.requisitionNo;
 
         // Only generate new number if creating new (not editing)
@@ -460,15 +479,13 @@ service cloud.firestore {
         
         await saveToCloud('requisitions', finalData); 
         setViewingRequisition(finalData);
+        setAutoPrint(!!shouldPrint);
         setCurrentView('VIEW_REQUISITION');
-        setTimeout(() => {
-          window.print();
-        }, 800);
       }} editingData={editingRequisition} nextReqNo={getNextReqNo()} availableUnits={units} availablePayees={payees} availableSisters={sisters} />;
-      case 'VIEW_REQUISITION': return <RequisitionForm onViewChange={setCurrentView} onPrint={() => setCurrentView('REQ_LIST')} editingData={viewingRequisition} readOnly={true} availableUnits={units} availablePayees={payees} availableSisters={sisters} />;
-      case 'DV_LIST': return <DebitVoucherList vouchers={debitVouchers} onDelete={(id) => deleteFromCloud('vouchers', id)} onAdd={() => { setEditingDV(null); setCurrentView('DEBIT_VOUCHER'); }} onEdit={(dv) => { setEditingDV(dv); setCurrentView('DEBIT_VOUCHER'); }} onView={(dv) => { setViewingDV(dv); setCurrentView('VIEW_DV'); }} onPreview={(dv) => { setViewingDV(dv); setCurrentView('VIEW_DV'); }} onViewChange={setCurrentView} onUpdateStatus={(id, status) => onUpdateStatus('vouchers', id, status)} />;
+      case 'VIEW_REQUISITION': return <RequisitionForm onViewChange={setCurrentView} onPrint={() => setCurrentView('REQ_LIST')} editingData={viewingRequisition} readOnly={true} autoPrint={autoPrint} availableUnits={units} availablePayees={payees} availableSisters={sisters} />;
+      case 'DV_LIST': return <DebitVoucherList vouchers={debitVouchers} onDelete={(id) => deleteFromCloud('vouchers', id)} onAdd={() => { setEditingDV(null); setCurrentView('DEBIT_VOUCHER'); }} onEdit={(dv) => { setEditingDV(dv); setCurrentView('DEBIT_VOUCHER'); }} onView={(dv) => { setViewingDV(dv); setAutoPrint(false); setCurrentView('VIEW_DV'); }} onPreview={(dv) => { setViewingDV(dv); setAutoPrint(true); setCurrentView('VIEW_DV'); }} onViewChange={setCurrentView} onUpdateStatus={(id, status) => onUpdateStatus('vouchers', id, status)} />;
       case 'DEBIT_VOUCHER': 
-        return <DebitVoucher onViewChange={setCurrentView} onSave={async (newData) => { 
+        return <DebitVoucher onViewChange={setCurrentView} onSave={async (newData, shouldPrint) => { 
           let finalNo = newData.no;
 
           // Only generate new number if creating new (not editing)
@@ -494,14 +511,12 @@ service cloud.firestore {
           
           await saveToCloud('vouchers', finalData); 
           setViewingDV(finalData);
+          setAutoPrint(!!shouldPrint);
           setCurrentView('VIEW_DV');
-          setTimeout(() => {
-            window.print();
-          }, 800);
         }} editingData={editingDV} nextDVNo={getNextDVNo()} availableUnits={units} availablePayees={payees} availableSisters={sisters} />;
-      case 'VIEW_DV': return <DebitVoucher onViewChange={setCurrentView} onPrint={() => setCurrentView('DV_LIST')} editingData={viewingDV} readOnly={true} availableUnits={units} availablePayees={payees} availableSisters={sisters} />;
-      case 'REQ_REPORT': return <RequisitionReport requisitions={requisitions} onViewChange={setCurrentView} />;
-      case 'DV_REPORT': return <DebitVoucherReport vouchers={debitVouchers} onViewChange={setCurrentView} />;
+      case 'VIEW_DV': return <DebitVoucher onViewChange={setCurrentView} onPrint={() => setCurrentView('DV_LIST')} editingData={viewingDV} readOnly={true} autoPrint={autoPrint} availableUnits={units} availablePayees={payees} availableSisters={sisters} />;
+      case 'REQ_REPORT': return <RequisitionReport requisitions={requisitions} onViewChange={setCurrentView} settings={companySettings} />;
+      case 'DV_REPORT': return <DebitVoucherReport vouchers={debitVouchers} onViewChange={setCurrentView} settings={companySettings} />;
       case 'NEW_NAME': return <NewNameEntry payees={payees} onUpdatePayees={(list) => {
         const existingIds = list.map(p => p.id);
         payees.forEach(p => { if (!existingIds.includes(p.id)) deleteFromCloud('payees', p.id); });
@@ -523,6 +538,7 @@ service cloud.firestore {
         list.forEach(u => saveToCloud('users', u));
       }} onViewChange={setCurrentView} onStandardizeReqNumbers={handleStandardizeReqNumbers} />;
       case 'DB_ARCHIVE': return <DatabaseArchive logs={auditLogs} onRestore={handleRestoreLog} onDelete={handleDeleteLog} onView={handleViewLog} onPreview={handlePreviewLog} />;
+      case 'SETTINGS': return <Settings onViewChange={setCurrentView} settings={companySettings} onSave={async (s) => { await setDoc(doc(db, 'settings', 'company'), s); }} />;
       default: return <DashboardHome onViewChange={setCurrentView} activeUserCount={activeUsers.length} requisitions={requisitions} vouchers={debitVouchers} sisters={sisters} user={user} />;
     }
   };

@@ -21,8 +21,9 @@ import {
 
 interface DebitVoucherProps {
   onViewChange?: (view: ViewType) => void;
-  onSave?: (data: DebitVoucherData) => void;
+  onSave?: (data: DebitVoucherData, shouldPrint?: boolean) => void;
   onPrint?: () => void;
+  autoPrint?: boolean;
   editingData?: DebitVoucherData | null;
   nextDVNo?: string;
   readOnly?: boolean;
@@ -35,6 +36,7 @@ export const DebitVoucher: React.FC<DebitVoucherProps> = ({
   onViewChange, 
   onSave, 
   onPrint,
+  autoPrint = false,
   editingData, 
   nextDVNo,
   readOnly = false,
@@ -124,6 +126,12 @@ export const DebitVoucher: React.FC<DebitVoucherProps> = ({
   const instrumentDate = formatDate(data.chequeDate);
 
   const voucherRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (autoPrint && readOnly && voucherRef.current) {
+      handlePrint();
+    }
+  }, [autoPrint, readOnly]);
 
   const handleSaveAsPDF = async () => {
     if (!voucherRef.current) return;
@@ -338,7 +346,7 @@ export const DebitVoucher: React.FC<DebitVoucherProps> = ({
               </div>
             </div>
 
-            <div className="mt-auto mb-1 px-1 flex justify-between items-end text-[10px] font-bold w-full" style={{ pageBreakInside: 'avoid' }}>
+            <div className="mt-30 mb-1 px-1 flex justify-between items-end text-[10px] font-bold w-full" style={{ pageBreakInside: 'avoid' }}>
               <div className="flex flex-col items-center">
                 <div className="w-24 border-t border-black mb-1"></div>
                 <span>Prepared by</span>
@@ -499,14 +507,41 @@ export const DebitVoucher: React.FC<DebitVoucherProps> = ({
             </div>
           </div>
 
-          <div className="pt-8 flex flex-col gap-6">
+          <div className="pt-12 flex flex-col gap-8">
             <div className="h-px bg-slate-100 w-full"></div>
-            <button 
-              type="submit"
-              className="w-full py-6 rounded-[1.75rem] bg-[#10B981] font-black text-white hover:bg-green-600 transition-all shadow-2xl shadow-green-500/20 flex items-center justify-center gap-4 uppercase text-2xl tracking-widest active:scale-[0.98]"
-            >
-              <Save size={28} /> Save & Print Voucher
-            </button>
+            <div className="flex gap-6 w-full">
+              <button 
+                type="button"
+                onClick={() => {
+                  if (!data.paidTo) return alert("Please select a Payee Name");
+                  if (!data.sisterConcern) return alert("Please select a Sister Concern");
+                  onSave?.(data, false);
+                }}
+                className="flex-grow py-10 rounded-[2.5rem] bg-blue-600 font-black text-white hover:bg-blue-700 transition-all shadow-2xl shadow-blue-500/20 flex items-center justify-center gap-6 uppercase text-4xl tracking-widest active:scale-[0.98]"
+              >
+                <Save size={40} /> Save
+              </button>
+
+              <button 
+                type="button"
+                onClick={() => {
+                  if (!data.paidTo) return alert("Please select a Payee Name");
+                  if (!data.sisterConcern) return alert("Please select a Sister Concern");
+                  onSave?.(data, true);
+                }}
+                className="flex-grow py-10 rounded-[2.5rem] bg-indigo-600 font-black text-white hover:bg-indigo-700 transition-all shadow-2xl shadow-indigo-500/20 flex items-center justify-center gap-6 uppercase text-4xl tracking-widest active:scale-[0.98]"
+              >
+                <Printer size={40} /> Print
+              </button>
+
+              <button 
+                type="button"
+                onClick={() => onViewChange?.('DV_LIST')}
+                className="px-16 py-10 rounded-[2.5rem] bg-slate-200 font-black text-slate-600 hover:bg-slate-300 transition-all flex items-center justify-center gap-6 uppercase text-4xl tracking-widest active:scale-[0.98]"
+              >
+                <X size={40} /> Close
+              </button>
+            </div>
           </div>
         </form>
       </div>

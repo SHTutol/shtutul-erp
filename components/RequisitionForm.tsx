@@ -10,13 +10,15 @@ import {
   Calendar, 
   Hash, 
   User,
-  ArrowRightCircle
+  ArrowRightCircle,
+  X
 } from 'lucide-react';
 
 export interface RequisitionFormProps {
   onViewChange?: (view: ViewType) => void;
-  onSave?: (data: RequisitionData) => void;
+  onSave?: (data: RequisitionData, shouldPrint?: boolean) => void;
   onPrint?: () => void;
+  autoPrint?: boolean;
   editingData?: RequisitionData | null;
   nextReqNo?: string;
   readOnly?: boolean;
@@ -29,6 +31,7 @@ export const RequisitionForm: React.FC<RequisitionFormProps> = ({
   onViewChange, 
   onSave, 
   onPrint,
+  autoPrint = false,
   editingData, 
   nextReqNo,
   readOnly = false,
@@ -36,35 +39,34 @@ export const RequisitionForm: React.FC<RequisitionFormProps> = ({
   availablePayees = [],
   availableSisters = []
 }) => {
-  const [data, setData] = useState<RequisitionData>({
-    id: Math.random().toString(36).substr(2, 9),
-    date: new Date().toISOString().split('T')[0],
-    requisitionNo: nextReqNo || '',
-    nameOfPayee: '',
-    sisterConcern: '',
-    unit: '',
-    through: '',
-    purpose: '',
-    typeOfRequisition: '',
-    amountTk: 0,
-    indentedBy: '',
-    status: 'Pending'
+  const [data, setData] = useState<RequisitionData>(() => {
+    if (editingData) return { ...editingData };
+    return {
+      id: Math.random().toString(36).substr(2, 9),
+      date: new Date().toISOString().split('T')[0],
+      requisitionNo: nextReqNo || '',
+      nameOfPayee: '',
+      sisterConcern: availableSisters.length > 0 ? availableSisters[0].name : 'SIM FABRICS LIMITED',
+      unit: availableUnits.length > 0 ? availableUnits[0].name : 'KNIT DYEING UNIT',
+      through: '',
+      purpose: '',
+      typeOfRequisition: '',
+      amountTk: 0,
+      indentedBy: '',
+      status: 'Pending'
+    };
   });
 
-  useEffect(() => {
-    if (!editingData) {
-      setData(prev => ({
-        ...prev,
-        sisterConcern: availableSisters.length > 0 ? availableSisters[0].name : 'SIM FABRICS LIMITED',
-        unit: availableUnits.length > 0 ? availableUnits[0].name : 'KNIT DYEING UNIT'
-      }));
-    }
-  }, [availableSisters, availableUnits, editingData]);
-
-  const [payeeSearch, setPayeeSearch] = useState('');
+  const [payeeSearch, setPayeeSearch] = useState(editingData?.nameOfPayee || '');
   const [showPayeeList, setShowPayeeList] = useState(false);
   const payeeRef = useRef<HTMLDivElement>(null);
   const requisitionRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (autoPrint && readOnly && requisitionRef.current) {
+      handlePrint();
+    }
+  }, [autoPrint, readOnly]);
 
   useEffect(() => {
     if (editingData) {
@@ -95,7 +97,56 @@ export const RequisitionForm: React.FC<RequisitionFormProps> = ({
   };
 
   const handlePrint = () => {
-    window.print();
+    if (!requisitionRef.current) return;
+    
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) {
+      alert('Please allow popups to print.');
+      return;
+    }
+
+    const content = requisitionRef.current.outerHTML;
+    const styles = Array.from(document.querySelectorAll('style, link[rel="stylesheet"]'))
+      .map(s => s.outerHTML)
+      .join('\n');
+
+    printWindow.document.write(`
+      <html>
+        <head>
+          <title>Print Requisition - ${data.requisitionNo}</title>
+          ${styles}
+          <style>
+            @page { size: A4 portrait; margin: 5mm; }
+            body { margin: 0; padding: 0; background: white; }
+            .requisition-paper { 
+              width: 100% !important; 
+              max-width: 210mm !important;
+              margin: 0 auto !important;
+              box-shadow: none !important;
+              border: none !important;
+              padding: 5mm 10mm !important;
+              visibility: visible !important;
+              display: flex !important;
+              flex-direction: column !important;
+              min-height: 280mm !important;
+            }
+            .no-print { display: none !important; }
+          </style>
+        </head>
+        <body>
+          ${content}
+          <script>
+            window.onload = () => {
+              setTimeout(() => {
+                window.print();
+                window.close();
+              }, 700);
+            };
+          </script>
+        </body>
+      </html>
+    `);
+    printWindow.document.close();
     onPrint?.();
   };
 
@@ -284,10 +335,35 @@ export const RequisitionForm: React.FC<RequisitionFormProps> = ({
 
             <div className="pt-10 flex gap-4 border-t border-slate-100">
               <button 
-                type="submit"
-                className="flex-grow px-10 py-5 rounded-2xl bg-purple-600 font-black text-white hover:bg-purple-700 transition-all shadow-2xl flex items-center justify-center gap-3 uppercase text-xl tracking-wider active:scale-[0.98]"
+                type="button"
+                onClick={() => {
+                  if (!data.nameOfPayee) return alert("Please select a Payee Name");
+                  if (!data.sisterConcern) return alert("Please select a Sister Concern");
+                  onSave?.(data, false);
+                }}
+                className="flex-grow px-6 py-5 rounded-2xl bg-blue-600 font-black text-white hover:bg-blue-700 transition-all shadow-xl flex items-center justify-center gap-3 uppercase text-lg tracking-wider active:scale-[0.98]"
               >
-                <Save size={24} /> Save & Print Requisition
+                <Save size={22} /> Save
+              </button>
+              
+              <button 
+                type="button"
+                onClick={() => {
+                  if (!data.nameOfPayee) return alert("Please select a Payee Name");
+                  if (!data.sisterConcern) return alert("Please select a Sister Concern");
+                  onSave?.(data, true);
+                }}
+                className="flex-grow px-6 py-5 rounded-2xl bg-purple-600 font-black text-white hover:bg-purple-700 transition-all shadow-xl flex items-center justify-center gap-3 uppercase text-lg tracking-wider active:scale-[0.98]"
+              >
+                <Printer size={22} /> Print
+              </button>
+
+              <button 
+                type="button"
+                onClick={() => onViewChange?.('REQ_LIST')}
+                className="px-8 py-5 rounded-2xl bg-slate-200 font-black text-slate-600 hover:bg-slate-300 transition-all flex items-center justify-center gap-3 uppercase text-lg tracking-wider active:scale-[0.98]"
+              >
+                <X size={22} /> Close
               </button>
             </div>
           </form>

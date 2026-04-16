@@ -1,6 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { ViewType } from '../App';
-import { DebitVoucherData } from '../types';
+import { DebitVoucherData, ViewType, CompanySettings } from '../types';
 import { 
   FileBarChart, 
   Printer, 
@@ -20,11 +19,10 @@ import {
 interface DebitVoucherReportProps {
   onViewChange: (view: ViewType) => void;
   vouchers: DebitVoucherData[];
+  settings: CompanySettings;
 }
 
-const LOGO_SRC = "https://files.oaiusercontent.com/file-m0hO9HiaS6O6N84Y8mG68O?se=2025-02-14T06%3A36%3A14Z&sp=r&sv=2024-08-04&sr=b&rscc=max-age%3D604800%2C%20immutable%2C%20private&rscd=attachment%3B%20filename%3D75a95ef8-10ce-4c12-8868-809228e938f3.webp&sig=G0S8/hWnK/4E8WjB6Nn7f09f0F5mD/G2O/v3Vv0V4%3D";
-
-export const DebitVoucherReport: React.FC<DebitVoucherReportProps> = ({ onViewChange, vouchers }) => {
+export const DebitVoucherReport: React.FC<DebitVoucherReportProps> = ({ onViewChange, vouchers, settings }) => {
   // Filter States
   const [refFilter, setRefFilter] = useState('');
   const [payeeFilter, setPayeeFilter] = useState('');
@@ -124,7 +122,57 @@ export const DebitVoucherReport: React.FC<DebitVoucherReportProps> = ({ onViewCh
   };
 
   const handlePrint = () => {
-    window.print();
+    const printArea = document.querySelector('.print-area');
+    if (!printArea) return;
+
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) {
+      alert('Please allow popups to print.');
+      return;
+    }
+
+    const content = printArea.outerHTML;
+    const styles = Array.from(document.querySelectorAll('style, link[rel="stylesheet"]'))
+      .map(s => s.outerHTML)
+      .join('\n');
+
+    printWindow.document.write(`
+      <html>
+        <head>
+          <title>Debit Voucher Ledger - ${new Date().toLocaleDateString()}</title>
+          ${styles}
+          <style>
+            @page { size: A4 landscape; margin: 10mm; }
+            body { margin: 0; padding: 0; background: white; }
+            .print-area { 
+              width: 100% !important; 
+              box-shadow: none !important;
+              border: none !important;
+              visibility: visible !important;
+              display: flex !important;
+              flex-direction: column !important;
+            }
+            .no-print { display: none !important; }
+            .hidden.print\\:flex { display: flex !important; }
+            table { width: 100% !important; border-collapse: collapse !important; }
+            th, td { border: 1px solid #e2e8f0 !important; }
+            th { background-color: #f8fafc !important; color: black !important; }
+          </style>
+        </head>
+        <body>
+          ${content}
+          <script>
+            window.onload = () => {
+              setTimeout(() => {
+                window.print();
+                window.close();
+              }, 700);
+            };
+          </script>
+        </body>
+      </html>
+    `);
+    printWindow.document.close();
   };
 
   return (
@@ -239,11 +287,11 @@ export const DebitVoucherReport: React.FC<DebitVoucherReportProps> = ({ onViewCh
         {/* Hidden Print Header with Logo */}
         <div className="hidden print:flex flex-col items-center mb-4 w-full text-center">
           <div className="flex items-center gap-6 mb-4">
-            <img src={LOGO_SRC} alt="SIM Group Logo" className="w-24 h-24 object-contain" />
+            <img src={settings.logoUrl} alt="Logo" className="w-24 h-24 object-contain" referrerPolicy="no-referrer" />
             <div className="text-left">
-              <h1 className="text-4xl font-black uppercase tracking-tighter text-slate-900 leading-none">SIM GROUP</h1>
-              <h2 className="text-xl font-regular tracking-tighter text-slate-900 leading-none mt-2">Head Office: House # 315, Road # 04, Baridhara D.O.H.S, Dhaka.</h2>
-              <h3 className="text-xl font-regular tracking-tighter text-slate-900 leading-none">Tel: +88 02 8415961-3 E-Mail: info@simgroup-bd.com www.simgroup-bd.com</h3>
+              <h1 className="text-4xl font-black uppercase tracking-tighter text-slate-900 leading-none">{settings.companyName}</h1>
+              <h2 className="text-xl font-regular tracking-tighter text-slate-900 leading-none mt-2">Head Office: {settings.address}</h2>
+              <h3 className="text-xl font-regular tracking-tighter text-slate-900 leading-none">Tel: {settings.phone} E-Mail: {settings.email} {settings.website}</h3>
               <p className="text-[10px] font-bold uppercase tracking-[0.4em] text-slate-500 mt-2">SHTUTUL ERP Debit Ledger</p>
             </div>
           </div>
